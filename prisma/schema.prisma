@@ -1,0 +1,413 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum LearningPath {
+  KIDS
+  SPOKEN
+  IELTS
+  ADMISSION
+  JOB
+  VOCAB
+}
+
+enum PaymentGateway {
+  BKASH
+  NAGAD
+  STRIPE
+  PLAY_STORE
+  APP_STORE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum League {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+enum OtpPurpose {
+  LOGIN
+  REGISTER
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(uuid())
+  email           String?   @unique
+  phone           String?   @unique
+  passwordHash    String?
+  name            String
+  avatarUrl       String?
+  role            String    @default("FREE") // FREE | PREMIUM | ADMIN
+  learningPath    LearningPath?
+  nctbClass       Int?      // For school students: 1-12
+
+  // Gamification
+  lives           Int       @default(5)
+  gems            Int       @default(0)
+  league          League    @default(BRONZE)
+  xpTotal         Int       @default(0)
+  lastLifeRefill  DateTime?
+
+  // WhatsApp opt-in for engagement reminders
+  whatsappOptIn   Boolean   @default(false)
+
+  // Family / B2B
+  parentId        String?
+  organizationId  String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  progress        UserProgress[]
+  streak          Streak?
+  dailyGoals      DailyGoal[]
+  bookmarks       Bookmark[]
+  subscriptions   Subscription[]
+  payments        PaymentTransaction[]
+  consumables     ConsumablePurchase[]
+  inventory       UserItem[]
+  leaderboard     LeaderboardEntry[]
+  children        User[]    @relation("ParentChild")
+  parent          User?     @relation("ParentChild", fields: [parentId], references: [id])
+  organization    B2BOrganization? @relation(fields: [organizationId], references: [id])
+  referralsMade   Referral[]       @relation("Referrer")
+  referralsRecv   Referral[]       @relation("Referee")
+  otpRequests     OtpRequest[]
+  deviceTokens    DeviceToken[]
+  challengesSent  FriendChallenge[] @relation("ChallengeSender")
+  challengesRecv  FriendChallenge[] @relation("ChallengeReceiver")
+  studyGroupMembers StudyGroupMember[]
+  flashcardReviews  FlashcardReview[]
+}
+
+model OtpRequest {
+  id         String     @id @default(uuid())
+  phone      String
+  code       String
+  purpose    OtpPurpose @default(LOGIN)
+  expiresAt  DateTime
+  verified   Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id])
+
+  @@index([phone])
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique // Expo push token or FCM token
+  platform  String   // ios | android
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Story {
+  id              String        @id @default(uuid())
+  title           String
+  titleBn         String        // Bangla title
+  description     String
+  descriptionBn   String
+  level           Int           // 1=Beginner, 2=Elementary, 3=Intermediate, 4=Advanced
+  learningPath    LearningPath
+  isPremium       Boolean       @default(false)
+  nctbClass       Int?          // NCTB alignment: 1-10
+  nctbUnit        String?       // e.g. "Unit 3"
+  illustrationUrl String
+  audioUrl        String
+  durationSeconds Int           @default(0)
+  wordCount       Int           @default(0)
+  tags            String[]      // e.g. ["phonics", "animals", "ssc"]
+  isPublished     Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  // Relations
+  pages           StoryPage[]
+  progress        UserProgress[]
+  challenges      FriendChallenge[]
+  quizzes         Quiz[]
+}
+
+model StoryPage {
+  id        String     @id @default(uuid())
+  storyId   String
+  story     Story      @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  pageIndex Int
+  imageUrl  String
+
+  // Relations
+  sentences Sentence[]
+}
+
+model Sentence {
+  id          String    @id @default(uuid())
+  pageId      String
+  page        StoryPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  sentenceIdx Int
+  englishText String
+  banglaText  String
+  startTime   Float     // Audio offset in seconds
+  endTime     Float
+
+  // Relations
+  tokens      WordToken[]
+}
+
+model WordToken {
+  id              String   @id @default(uuid())
+  sentenceId      String
+  sentence        Sentence @relation(fields: [sentenceId], references: [id], onDelete: Cascade)
+  english         String
+  bangla          String
+  sentenceContext String
+  pronunciationG  String?  // IPA phonetic guide e.g. "ˈɛpəl"
+
+  // Spaced repetition via bookmarks
+  bookmarks       Bookmark[]
+}
+
+model Bookmark {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wordTokenId   String?
+  wordToken     WordToken? @relation(fields: [wordTokenId], references: [id])
+  englishWord   String
+  banglaMeaning String
+  context       String
+  savedAt       DateTime  @default(now())
+
+  // Spaced repetition fields
+  nextReviewAt  DateTime  @default(now())
+  interval      Int       @default(1)   // days until next review
+  easeFactor    Float     @default(2.5) // SM-2 ease factor
+  repetitions   Int       @default(0)
+
+  @@unique([userId, englishWord])
+  @@index([userId, nextReviewAt])
+}
+
+model FlashcardReview {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word       String
+  quality    Int      // 0-5 (SM-2 response quality)
+  reviewedAt DateTime @default(now())
+}
+
+model UserProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storyId     String
+  story       Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  completed   Boolean  @default(false)
+  score       Int      @default(0)    // Quiz score 0-100
+  xpEarned    Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, storyId])
+  @@index([userId])
+}
+
+model Quiz {
+  id        String         @id @default(uuid())
+  storyId   String
+  story     Story          @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  createdAt DateTime       @default(now())
+}
+
+model QuizQuestion {
+  id            String   @id @default(uuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionText  String
+  questionTextBn String?
+  options       String[] // JSON array of option strings
+  correctIndex  Int      // index into options array
+  explanation   String?
+  xpReward      Int      @default(10)
+}
+
+model Streak {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak  Int       @default(0)
+  longestStreak  Int       @default(0)
+  lastActiveDate DateTime?
+  freezesUsed    Int       @default(0)
+}
+
+model DailyGoal {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  targetXp    Int      @default(50)
+  earnedXp    Int      @default(0)
+  completed   Boolean  @default(false)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model LeaderboardEntry {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  league       League
+  weekStarting DateTime @db.Date
+  xpEarned     Int      @default(0)
+
+  @@unique([userId, weekStarting])
+  @@index([league, weekStarting, xpEarned])
+}
+
+model UserItem {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemType    String   // STREAK_FREEZE | EXTRA_LIFE | AVATAR_OUTFIT | BONUS_LESSON
+  itemId      String?  // Reference to specific item (e.g., outfit ID)
+  quantity    Int      @default(1)
+  purchasedAt DateTime @default(now())
+}
+
+model Subscription {
+  id             String             @id @default(uuid())
+  userId         String
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gateway        PaymentGateway
+  status         SubscriptionStatus @default(PENDING)
+  planType       String             @default("MONTHLY") // MONTHLY | YEARLY | FAMILY | B2B
+  seatCount      Int                @default(1)
+  expiryDate     DateTime
+  subscriptionId String?            @unique // Stripe sub ID or RevenueCat transaction ID
+  autoRenew      Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([userId, status])
+}
+
+model PaymentTransaction {
+  id            String         @id @default(uuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gateway       PaymentGateway
+  transactionId String         @unique
+  amount        Float
+  currency      String         @default("BDT")
+  status        String         // SUCCESS | FAILED | CANCELLED | PENDING
+  metadata      Json?          // Gateway-specific payload
+  createdAt     DateTime       @default(now())
+
+  @@index([userId])
+  @@index([gateway, status])
+}
+
+model ConsumablePurchase {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String   // STORY_UNLOCK | BOOSTER_7DAY | PRONUNCIATION_CREDITS | WRITING_TOKEN | GEM_PACK
+  quantity      Int      @default(1)
+  referenceId   String?  // e.g. storyId for STORY_UNLOCK
+  transactionId String   @unique
+  purchasedAt   DateTime @default(now())
+
+  @@index([userId, type])
+}
+
+model Referral {
+  id            String   @id @default(uuid())
+  referrerId    String
+  referrer      User     @relation("Referrer", fields: [referrerId], references: [id])
+  refereeId     String
+  referee       User     @relation("Referee", fields: [refereeId], references: [id])
+  status        String   @default("PENDING") // PENDING | COMPLETED
+  rewardGranted Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@unique([referrerId, refereeId])
+}
+
+model B2BOrganization {
+  id              String   @id @default(uuid())
+  name            String
+  type            String   // SCHOOL | COACHING_CENTER | MADRASA | FAMILY | CORPORATE
+  licenseCount    Int      @default(25)
+  adminId         String   @unique
+  contactPerson   String?
+  contactPhone    String?
+  customBranding  Json?    // { logoUrl, accentColor, centerName }
+  nctbClassFocus  Int[]    // e.g. [6, 7, 8]
+  contractEnd     DateTime?
+  monthlyReportDay Int     @default(1)
+  members         User[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FriendChallenge {
+  id          String   @id @default(uuid())
+  senderId    String
+  sender      User     @relation("ChallengeSender", fields: [senderId], references: [id])
+  receiverId  String
+  receiver    User     @relation("ChallengeReceiver", fields: [receiverId], references: [id])
+  storyId     String
+  story       Story    @relation(fields: [storyId], references: [id])
+  senderScore Int?
+  receiverScore Int?
+  status      String   @default("PENDING") // PENDING | ACCEPTED | COMPLETED | EXPIRED
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model StudyGroup {
+  id        String             @id @default(uuid())
+  name      String
+  inviteCode String            @unique
+  maxSize   Int                @default(10)
+  members   StudyGroupMember[]
+  createdAt DateTime           @default(now())
+}
+
+model StudyGroupMember {
+  id          String     @id @default(uuid())
+  groupId     String
+  group       StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weeklyXp    Int        @default(0)
+  joinedAt    DateTime   @default(now())
+
+  @@unique([groupId, userId])
+}

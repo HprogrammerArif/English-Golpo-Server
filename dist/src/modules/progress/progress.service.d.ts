@@ -18,6 +18,17 @@ export declare class FlashcardResultDto {
     word: string;
     quality: number;
 }
+export declare class AddMistakeDto {
+    type: string;
+    englishText: string;
+    banglaText: string;
+}
+export declare class ResolveMistakeDto {
+    id: string;
+}
+export declare class ToggleLearnedDto {
+    word: string;
+}
 export declare class ProgressService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -36,6 +47,7 @@ export declare class ProgressService {
         interval: number;
         easeFactor: number;
         repetitions: number;
+        isLearned: boolean;
     }>;
     removeBookmark(userId: string, word: string): Promise<{
         removed: string;
@@ -53,6 +65,7 @@ export declare class ProgressService {
             interval: number;
             easeFactor: number;
             repetitions: number;
+            isLearned: boolean;
         }[];
         pagination: {
             page: number;
@@ -81,5 +94,75 @@ export declare class ProgressService {
         nextReviewAt: Date;
         interval: number;
         skipped?: undefined;
+    }>;
+    getMistakes(userId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        englishText: string;
+        banglaText: string;
+        type: string;
+        userId: string;
+        incorrectCount: number;
+        corrected: boolean;
+    }[]>;
+    addMistake(userId: string, dto: AddMistakeDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        englishText: string;
+        banglaText: string;
+        type: string;
+        userId: string;
+        incorrectCount: number;
+        corrected: boolean;
+    }>;
+    resolveMistake(userId: string, mistakeId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        englishText: string;
+        banglaText: string;
+        type: string;
+        userId: string;
+        incorrectCount: number;
+        corrected: boolean;
+    }>;
+    getSentencePatterns(): Promise<{
+        id: string;
+        createdAt: Date;
+        pattern: string;
+        patternBn: string;
+        exampleEn: string;
+        exampleBn: string;
+        category: string;
+    }[]>;
+    getLearnedWords(userId: string): Promise<{
+        id: string;
+        userId: string;
+        englishWord: string;
+        banglaMeaning: string;
+        context: string;
+        wordTokenId: string | null;
+        savedAt: Date;
+        nextReviewAt: Date;
+        interval: number;
+        easeFactor: number;
+        repetitions: number;
+        isLearned: boolean;
+    }[]>;
+    toggleLearnedWord(userId: string, word: string): Promise<{
+        id: string;
+        userId: string;
+        englishWord: string;
+        banglaMeaning: string;
+        context: string;
+        wordTokenId: string | null;
+        savedAt: Date;
+        nextReviewAt: Date;
+        interval: number;
+        easeFactor: number;
+        repetitions: number;
+        isLearned: boolean;
     }>;
 }

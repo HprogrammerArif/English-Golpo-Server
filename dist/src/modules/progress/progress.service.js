@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProgressService = exports.FlashcardResultDto = exports.AddBookmarkDto = exports.SyncProgressDto = exports.ProgressSyncItemDto = void 0;
+exports.ProgressService = exports.ToggleLearnedDto = exports.ResolveMistakeDto = exports.AddMistakeDto = exports.FlashcardResultDto = exports.AddBookmarkDto = exports.SyncProgressDto = exports.ProgressSyncItemDto = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const class_validator_1 = require("class-validator");
@@ -96,6 +96,45 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], FlashcardResultDto.prototype, "quality", void 0);
+class AddMistakeDto {
+    type;
+    englishText;
+    banglaText;
+}
+exports.AddMistakeDto = AddMistakeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AddMistakeDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AddMistakeDto.prototype, "englishText", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AddMistakeDto.prototype, "banglaText", void 0);
+class ResolveMistakeDto {
+    id;
+}
+exports.ResolveMistakeDto = ResolveMistakeDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResolveMistakeDto.prototype, "id", void 0);
+class ToggleLearnedDto {
+    word;
+}
+exports.ToggleLearnedDto = ToggleLearnedDto;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ToggleLearnedDto.prototype, "word", void 0);
 let ProgressService = class ProgressService {
     prisma;
     constructor(prisma) {
@@ -204,6 +243,71 @@ let ProgressService = class ProgressService {
             data: { userId, word: dto.word, quality: q },
         });
         return { word: dto.word, nextReviewAt, interval };
+    }
+    async getMistakes(userId) {
+        return this.prisma.userMistake.findMany({
+            where: { userId, corrected: false },
+            orderBy: { updatedAt: "desc" },
+        });
+    }
+    async addMistake(userId, dto) {
+        return this.prisma.userMistake.upsert({
+            where: {
+                userId_type_englishText: {
+                    userId,
+                    type: dto.type,
+                    englishText: dto.englishText,
+                },
+            },
+            create: {
+                userId,
+                type: dto.type,
+                englishText: dto.englishText,
+                banglaText: dto.banglaText,
+                incorrectCount: 1,
+                corrected: false,
+            },
+            update: {
+                incorrectCount: { increment: 1 },
+                corrected: false,
+                updatedAt: new Date(),
+            },
+        });
+    }
+    async resolveMistake(userId, mistakeId) {
+        return this.prisma.userMistake.update({
+            where: { id: mistakeId },
+            data: { corrected: true },
+        });
+    }
+    async getSentencePatterns() {
+        return this.prisma.sentencePattern.findMany({
+            orderBy: { createdAt: "asc" },
+        });
+    }
+    async getLearnedWords(userId) {
+        return this.prisma.bookmark.findMany({
+            where: {
+                userId,
+                OR: [
+                    { isLearned: true },
+                    { repetitions: { gte: 5 } },
+                ],
+            },
+            orderBy: { savedAt: "desc" },
+        });
+    }
+    async toggleLearnedWord(userId, word) {
+        const bookmark = await this.prisma.bookmark.findFirst({
+            where: { userId, englishWord: word },
+        });
+        if (!bookmark) {
+            throw new Error(`Bookmark not found for word: ${word}`);
+        }
+        return this.prisma.bookmark.update({
+            where: { id: bookmark.id },
+            data: { isLearned: !bookmark.isLearned },
+        });
     }
 };
 exports.ProgressService = ProgressService;

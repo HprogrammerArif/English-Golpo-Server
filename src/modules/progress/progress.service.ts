@@ -32,6 +32,20 @@ export class FlashcardResultDto {
   @IsNumber() quality: number; // 0-5
 }
 
+export class AddMistakeDto {
+  @ApiProperty() @IsString() type: string; // WORD | SENTENCE
+  @ApiProperty() @IsString() englishText: string;
+  @ApiProperty() @IsString() banglaText: string;
+}
+
+export class ResolveMistakeDto {
+  @ApiProperty() @IsString() id: string;
+}
+
+export class ToggleLearnedDto {
+  @ApiProperty() @IsString() word: string;
+}
+
 @Injectable()
 export class ProgressService {
   constructor(private readonly prisma: PrismaService) {}
@@ -155,5 +169,78 @@ export class ProgressService {
     });
 
     return { word: dto.word, nextReviewAt, interval };
+  }
+
+  // ─── Practice & Growth Custom Methods ────────────────────────────
+
+  async getMistakes(userId: string) {
+    return this.prisma.userMistake.findMany({
+      where: { userId, corrected: false },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  async addMistake(userId: string, dto: AddMistakeDto) {
+    return this.prisma.userMistake.upsert({
+      where: {
+        userId_type_englishText: {
+          userId,
+          type: dto.type,
+          englishText: dto.englishText,
+        },
+      },
+      create: {
+        userId,
+        type: dto.type,
+        englishText: dto.englishText,
+        banglaText: dto.banglaText,
+        incorrectCount: 1,
+        corrected: false,
+      },
+      update: {
+        incorrectCount: { increment: 1 },
+        corrected: false,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async resolveMistake(userId: string, mistakeId: string) {
+    return this.prisma.userMistake.update({
+      where: { id: mistakeId },
+      data: { corrected: true },
+    });
+  }
+
+  async getSentencePatterns() {
+    return this.prisma.sentencePattern.findMany({
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  async getLearnedWords(userId: string) {
+    return this.prisma.bookmark.findMany({
+      where: {
+        userId,
+        OR: [
+          { isLearned: true },
+          { repetitions: { gte: 5 } },
+        ],
+      },
+      orderBy: { savedAt: "desc" },
+    });
+  }
+
+  async toggleLearnedWord(userId: string, word: string) {
+    const bookmark = await this.prisma.bookmark.findFirst({
+      where: { userId, englishWord: word },
+    });
+    if (!bookmark) {
+      throw new Error(`Bookmark not found for word: ${word}`);
+    }
+    return this.prisma.bookmark.update({
+      where: { id: bookmark.id },
+      data: { isLearned: !bookmark.isLearned },
+    });
   }
 }

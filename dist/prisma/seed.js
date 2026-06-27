@@ -215,6 +215,50 @@ async function main() {
         });
         console.log(`✅ Story: ${story.title}`);
     }
+    console.log('🌱 Seeding Sentence Patterns...');
+    const patterns = [
+        {
+            pattern: 'I want to + [verb]',
+            patternBn: 'আমি [কিছু] করতে চাই',
+            exampleEn: 'I want to learn English.',
+            exampleBn: 'আমি ইংরেজি শিখতে চাই।',
+            category: 'Desires (ইচ্ছা)',
+        },
+        {
+            pattern: 'It is time to + [verb]',
+            patternBn: 'এখন [কিছু] করার সময়',
+            exampleEn: 'It is time to study.',
+            exampleBn: 'এখন পড়াশোনা করার সময়।',
+            category: 'Daily Routine (দৈনন্দিন)',
+        },
+        {
+            pattern: 'How about + [verb-ing]?',
+            patternBn: '[কিছু] করলে কেমন হয়?',
+            exampleEn: 'How about playing football?',
+            exampleBn: 'ফুটবল খেললে কেমন হয়?',
+            category: 'Suggestions (পরামর্শ)',
+        },
+        {
+            pattern: 'I am looking forward to + [verb-ing]',
+            patternBn: 'আমি আগ্রহের সাথে [কিছুর] অপেক্ষা করছি',
+            exampleEn: 'I am looking forward to meeting you.',
+            exampleBn: 'আমি আপনার সাথে দেখা করার জন্য আগ্রহের সাথে অপেক্ষা করছি।',
+            category: 'Expectation (প্রত্যাশা)',
+        },
+        {
+            pattern: 'Would you mind + [verb-ing]?',
+            patternBn: 'আপনি কি দয়া করে [কিছু] করবেন?',
+            exampleEn: 'Would you mind opening the door?',
+            exampleBn: 'আপনি কি দয়া করে দরজাটা খুলে দেবেন?',
+            category: 'Polite Request (ভদ্র অনুরোধ)',
+        },
+    ];
+    for (const p of patterns) {
+        await prisma.sentencePattern.create({
+            data: p,
+        });
+    }
+    console.log('✅ Seeded spoken English sentence patterns');
     console.log('🎉 Seeding complete!');
 }
 main()

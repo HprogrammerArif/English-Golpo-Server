@@ -1,4 +1,4 @@
-import { ProgressService, SyncProgressDto, AddBookmarkDto, FlashcardResultDto } from './progress.service';
+import { ProgressService, SyncProgressDto, AddBookmarkDto, FlashcardResultDto, AddMistakeDto, ResolveMistakeDto, ToggleLearnedDto } from './progress.service';
 export declare class ProgressController {
     private readonly progressService;
     constructor(progressService: ProgressService);
@@ -22,6 +22,7 @@ export declare class ProgressController {
             interval: number;
             easeFactor: number;
             repetitions: number;
+            isLearned: boolean;
         }[];
         pagination: {
             page: number;
@@ -43,6 +44,7 @@ export declare class ProgressController {
         interval: number;
         easeFactor: number;
         repetitions: number;
+        isLearned: boolean;
     }>;
     removeBookmark(user: {
         id: string;
@@ -74,5 +76,85 @@ export declare class ProgressController {
         nextReviewAt: Date;
         interval: number;
         skipped?: undefined;
+    }>;
+    getMistakes(user: {
+        id: string;
+    }): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        englishText: string;
+        banglaText: string;
+        type: string;
+        userId: string;
+        incorrectCount: number;
+        corrected: boolean;
+    }[]>;
+    addMistake(user: {
+        id: string;
+    }, dto: AddMistakeDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        englishText: string;
+        banglaText: string;
+        type: string;
+        userId: string;
+        incorrectCount: number;
+        corrected: boolean;
+    }>;
+    resolveMistake(user: {
+        id: string;
+    }, dto: ResolveMistakeDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        englishText: string;
+        banglaText: string;
+        type: string;
+        userId: string;
+        incorrectCount: number;
+        corrected: boolean;
+    }>;
+    getSentencePatterns(): Promise<{
+        id: string;
+        createdAt: Date;
+        pattern: string;
+        patternBn: string;
+        exampleEn: string;
+        exampleBn: string;
+        category: string;
+    }[]>;
+    getLearnedWords(user: {
+        id: string;
+    }): Promise<{
+        id: string;
+        userId: string;
+        englishWord: string;
+        banglaMeaning: string;
+        context: string;
+        wordTokenId: string | null;
+        savedAt: Date;
+        nextReviewAt: Date;
+        interval: number;
+        easeFactor: number;
+        repetitions: number;
+        isLearned: boolean;
+    }[]>;
+    toggleLearnedWord(user: {
+        id: string;
+    }, dto: ToggleLearnedDto): Promise<{
+        id: string;
+        userId: string;
+        englishWord: string;
+        banglaMeaning: string;
+        context: string;
+        wordTokenId: string | null;
+        savedAt: Date;
+        nextReviewAt: Date;
+        interval: number;
+        easeFactor: number;
+        repetitions: number;
+        isLearned: boolean;
     }>;
 }

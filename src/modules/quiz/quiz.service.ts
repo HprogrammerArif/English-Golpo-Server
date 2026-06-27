@@ -53,6 +53,30 @@ export class QuizService {
       if (isCorrect) {
         correctCount++;
         xpEarned += q.xpReward;
+      } else {
+        // Record mistake in database
+        this.prisma.userMistake.upsert({
+          where: {
+            userId_type_englishText: {
+              userId,
+              type: 'SENTENCE',
+              englishText: q.questionText,
+            },
+          },
+          create: {
+            userId,
+            type: 'SENTENCE',
+            englishText: q.questionText,
+            banglaText: q.questionTextBn || '',
+            incorrectCount: 1,
+            corrected: false,
+          },
+          update: {
+            incorrectCount: { increment: 1 },
+            corrected: false,
+            updatedAt: new Date(),
+          },
+        }).catch((err) => console.error('Failed to save mistake:', err));
       }
       return {
         questionId: q.id,

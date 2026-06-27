@@ -40,6 +40,24 @@ let ProgressController = class ProgressController {
     recordFlashcardResult(user, dto) {
         return this.progressService.recordFlashcardResult(user.id, dto);
     }
+    getMistakes(user) {
+        return this.progressService.getMistakes(user.id);
+    }
+    addMistake(user, dto) {
+        return this.progressService.addMistake(user.id, dto);
+    }
+    resolveMistake(user, dto) {
+        return this.progressService.resolveMistake(user.id, dto.id);
+    }
+    getSentencePatterns() {
+        return this.progressService.getSentencePatterns();
+    }
+    getLearnedWords(user) {
+        return this.progressService.getLearnedWords(user.id);
+    }
+    toggleLearnedWord(user, dto) {
+        return this.progressService.toggleLearnedWord(user.id, dto.word);
+    }
 };
 exports.ProgressController = ProgressController;
 __decorate([
@@ -96,6 +114,56 @@ __decorate([
     __metadata("design:paramtypes", [Object, progress_service_1.FlashcardResultDto]),
     __metadata("design:returntype", void 0)
 ], ProgressController.prototype, "recordFlashcardResult", null);
+__decorate([
+    (0, common_1.Get)('mistakes'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get uncorrected mistakes' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ProgressController.prototype, "getMistakes", null);
+__decorate([
+    (0, common_1.Post)('mistakes'),
+    (0, swagger_1.ApiOperation)({ summary: 'Add a new mistake' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, progress_service_1.AddMistakeDto]),
+    __metadata("design:returntype", void 0)
+], ProgressController.prototype, "addMistake", null);
+__decorate([
+    (0, common_1.Post)('mistakes/resolve'),
+    (0, swagger_1.ApiOperation)({ summary: 'Mark mistake as corrected' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, progress_service_1.ResolveMistakeDto]),
+    __metadata("design:returntype", void 0)
+], ProgressController.prototype, "resolveMistake", null);
+__decorate([
+    (0, common_1.Get)('sentence-patterns'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get Spoken English sentence patterns' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ProgressController.prototype, "getSentencePatterns", null);
+__decorate([
+    (0, common_1.Get)('learned'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get completely learned vocabulary' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], ProgressController.prototype, "getLearnedWords", null);
+__decorate([
+    (0, common_1.Post)('learned/toggle'),
+    (0, swagger_1.ApiOperation)({ summary: 'Toggle learned word status' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, progress_service_1.ToggleLearnedDto]),
+    __metadata("design:returntype", void 0)
+], ProgressController.prototype, "toggleLearnedWord", null);
 exports.ProgressController = ProgressController = __decorate([
     (0, swagger_1.ApiTags)('progress'),
     (0, swagger_1.ApiBearerAuth)(),

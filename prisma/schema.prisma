@@ -100,6 +100,7 @@ model User {
   studyGroupMembers StudyGroupMember[]
   flashcardReviews  FlashcardReview[]
   mistakes          UserMistake[]
+  videoProgress     VideoProgress[]
 }
 
 model OtpRequest {
@@ -437,4 +438,39 @@ model UserMistake {
   updatedAt   DateTime @updatedAt
 
   @@unique([userId, type, englishText])
+}
+
+model VideoLesson {
+  id            String         @id @default(uuid())
+  title         String
+  titleBn       String
+  description   String
+  descriptionBn String
+  youtubeId     String         // YouTube video ID (embedded player)
+  thumbnailUrl  String
+  durationSeconds Int          @default(0)
+  learningPath  LearningPath
+  level         Int            @default(1)  // 1=Beginner..4=Advanced
+  nctbClass     Int?
+  tags          String[]
+  isPremium     Boolean        @default(false)
+  isPublished   Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+
+  progress      VideoProgress[]
+}
+
+model VideoProgress {
+  id          String      @id @default(uuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoId     String
+  video       VideoLesson @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  watchedSeconds Int      @default(0)
+  completed   Boolean     @default(false)
+  xpEarned    Int         @default(0)
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([userId, videoId])
+  @@index([userId])
 }

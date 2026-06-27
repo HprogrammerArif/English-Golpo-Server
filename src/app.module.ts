@@ -14,6 +14,7 @@ import { ShopModule } from './modules/shop/shop.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { GrowthModule } from './modules/growth/growth.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { VideoModule } from './modules/video/video.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AccountsModule } from './modules/accounts/accounts.module';
     PaymentModule,
     GrowthModule,
     AccountsModule,
+    VideoModule,
   ],
 })
 export class AppModule {}

@@ -30,8 +30,8 @@ export declare class PaymentController {
         id: string;
     }, dto: UnlockStoryDto): Promise<{
         id: string;
-        type: string;
         userId: string;
+        type: string;
         quantity: number;
         referenceId: string | null;
         transactionId: string;

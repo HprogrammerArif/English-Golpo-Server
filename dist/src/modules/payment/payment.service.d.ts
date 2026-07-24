@@ -19,8 +19,8 @@ export declare class PaymentService {
     }>;
     unlockStory(userId: string, storyId: string, transactionId: string): Promise<{
         id: string;
-        userId: string;
         type: string;
+        userId: string;
         quantity: number;
         referenceId: string | null;
         transactionId: string;

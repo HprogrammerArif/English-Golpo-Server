@@ -8,7 +8,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
-import { RegisterDto, PhoneLoginDto, VerifyOtpDto, SsoLoginDto } from './dto/auth.dto';
+import { RegisterDto, PhoneLoginDto, VerifyOtpDto, SsoLoginDto, EmailLoginDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('auth')
@@ -41,6 +41,15 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
   verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.authService.verifyOtp(dto);
+  }
+
+  @Post('login/email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login via email and password' })
+  @ApiResponse({ status: 200, description: 'Authenticated successfully, JWT returned' })
+  @ApiResponse({ status: 401, description: 'Invalid email or password' })
+  loginWithEmail(@Body() dto: EmailLoginDto) {
+    return this.authService.loginWithEmail(dto);
   }
 
   @Post('login/sso')

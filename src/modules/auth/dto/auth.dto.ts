@@ -53,3 +53,14 @@ export class SsoLoginDto {
   @IsIn(['google', 'apple'])
   provider: 'google' | 'apple';
 }
+
+export class EmailLoginDto {
+  @ApiProperty({ example: 'admin@englishgolpo.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ example: 'admin123' })
+  @IsString()
+  password: string;
+}
+

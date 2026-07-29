@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { RegisterDto, PhoneLoginDto, VerifyOtpDto, SsoLoginDto } from './dto/auth.dto';
+import { RegisterDto, PhoneLoginDto, VerifyOtpDto, SsoLoginDto, EmailLoginDto } from './dto/auth.dto';
 export declare class AuthService {
     private readonly prisma;
     private readonly jwt;
@@ -45,6 +45,17 @@ export declare class AuthService {
             role: string;
             learningPath: import("@prisma/client").$Enums.LearningPath | null;
             isNewUser: boolean;
+        };
+        token: string;
+    }>;
+    loginWithEmail(dto: EmailLoginDto): Promise<{
+        user: {
+            id: string;
+            name: string;
+            phone: string | null;
+            email: string | null;
+            role: string;
+            learningPath: import("@prisma/client").$Enums.LearningPath | null;
         };
         token: string;
     }>;

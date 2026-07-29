@@ -16,3 +16,7 @@ export declare class SsoLoginDto {
     idToken: string;
     provider: 'google' | 'apple';
 }
+export declare class EmailLoginDto {
+    email: string;
+    password: string;
+}

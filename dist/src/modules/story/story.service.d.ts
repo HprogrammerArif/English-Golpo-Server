@@ -15,6 +15,9 @@ export declare class StoryService {
             learningPath: import("@prisma/client").$Enums.LearningPath;
             nctbClass: number | null;
             createdAt: Date;
+            _count: {
+                pages: number;
+            };
             title: string;
             titleBn: string;
             description: string;
@@ -26,9 +29,6 @@ export declare class StoryService {
             durationSeconds: number;
             wordCount: number;
             tags: string[];
-            _count: {
-                pages: number;
-            };
         }[];
         pagination: {
             page: number;
@@ -44,6 +44,9 @@ export declare class StoryService {
             learningPath: import("@prisma/client").$Enums.LearningPath;
             nctbClass: number | null;
             createdAt: Date;
+            _count: {
+                pages: number;
+            };
             title: string;
             titleBn: string;
             description: string;
@@ -55,9 +58,6 @@ export declare class StoryService {
             durationSeconds: number;
             wordCount: number;
             tags: string[];
-            _count: {
-                pages: number;
-            };
         }[];
         pagination: {
             page: number;

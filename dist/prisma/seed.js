@@ -48,21 +48,49 @@ const prisma = new client_1.PrismaClient({
 async function main() {
     console.log('🌱 Seeding English Golpo database...');
     const adminHash = await bcrypt.hash('admin123', 12);
-    const admin = await prisma.user.upsert({
-        where: { email: 'admin@englishgolpo.com' },
-        update: {},
-        create: {
-            name: 'Admin',
-            email: 'admin@englishgolpo.com',
-            passwordHash: adminHash,
-            role: 'ADMIN',
-            gems: 9999,
-            xpTotal: 5000,
-            league: 'DIAMOND',
-            streak: { create: { currentStreak: 30, longestStreak: 30 } },
-        },
+    const userByPhone = await prisma.user.findUnique({ where: { phone: '01700000000' } });
+    const userByEmail = await prisma.user.findUnique({ where: { email: 'admin@englishgolpo.com' } });
+    if (userByPhone && userByEmail && userByPhone.id !== userByEmail.id) {
+        await prisma.user.delete({ where: { id: userByEmail.id } });
+    }
+    let adminUser = await prisma.user.findFirst({
+        where: {
+            OR: [
+                { email: 'admin@englishgolpo.com' },
+                { phone: '01700000000' }
+            ]
+        }
     });
-    console.log(`✅ Admin user: ${admin.email}`);
+    if (adminUser) {
+        adminUser = await prisma.user.update({
+            where: { id: adminUser.id },
+            data: {
+                email: 'admin@englishgolpo.com',
+                phone: '01700000000',
+                passwordHash: adminHash,
+                role: 'ADMIN',
+                gems: 9999,
+                xpTotal: 5000,
+                league: 'DIAMOND',
+            }
+        });
+    }
+    else {
+        adminUser = await prisma.user.create({
+            data: {
+                name: 'Admin User',
+                email: 'admin@englishgolpo.com',
+                phone: '01700000000',
+                passwordHash: adminHash,
+                role: 'ADMIN',
+                gems: 9999,
+                xpTotal: 5000,
+                league: 'DIAMOND',
+                streak: { create: { currentStreak: 30, longestStreak: 30 } },
+            },
+        });
+    }
+    console.log(`✅ Admin user: ${adminUser.email} (Phone: ${adminUser.phone})`);
     const stories = [
         {
             title: 'The Red Hen',

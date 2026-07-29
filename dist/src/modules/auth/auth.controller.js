@@ -33,6 +33,9 @@ let AuthController = class AuthController {
     verifyOtp(dto) {
         return this.authService.verifyOtp(dto);
     }
+    loginWithEmail(dto) {
+        return this.authService.loginWithEmail(dto);
+    }
     ssoLogin(dto) {
         return this.authService.ssoLogin(dto);
     }
@@ -70,6 +73,17 @@ __decorate([
     __metadata("design:paramtypes", [auth_dto_1.VerifyOtpDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "verifyOtp", null);
+__decorate([
+    (0, common_1.Post)('login/email'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Login via email and password' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Authenticated successfully, JWT returned' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid email or password' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [auth_dto_1.EmailLoginDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "loginWithEmail", null);
 __decorate([
     (0, common_1.Post)('login/sso'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

@@ -16,6 +16,8 @@ export declare class GrowthService {
         deepLink: string;
         shareUrl: string;
         message: string;
+        referralLink: string;
+        shareMessage: string;
     }>;
     redeemReferral(refereeId: string, code: string): Promise<{
         success: boolean;
@@ -37,6 +39,8 @@ export declare class GrowthService {
             appDeepLink: string;
         };
         whatsappText: string;
+        shareText: string;
+        scoreCardUrl: string;
     }>;
     trackEvent(userId: string, dto: TrackEventDto): Promise<{
         tracked: boolean;

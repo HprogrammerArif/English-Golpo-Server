@@ -6,12 +6,12 @@ export declare class AuthController {
     register(dto: RegisterDto): Promise<{
         user: {
             id: string;
-            email: string | null;
-            phone: string | null;
-            name: string;
-            role: string;
             learningPath: import("@prisma/client").$Enums.LearningPath | null;
             createdAt: Date;
+            name: string;
+            email: string | null;
+            phone: string | null;
+            role: string;
         };
         token: string;
     }>;

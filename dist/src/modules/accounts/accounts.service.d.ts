@@ -35,8 +35,8 @@ export declare class AccountsService {
     }>;
     provisionB2B(adminId: string, dto: ProvisionB2BDto): Promise<{
         id: string;
-        name: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         type: string;
         licenseCount: number;

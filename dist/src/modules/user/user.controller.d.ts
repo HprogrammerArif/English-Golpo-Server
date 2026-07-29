@@ -12,18 +12,18 @@ export declare class UserController {
             planType: string;
         };
         id: string;
+        learningPath: import("@prisma/client").$Enums.LearningPath | null;
+        createdAt: Date;
+        name: string;
         email: string | null;
         phone: string | null;
-        name: string;
         avatarUrl: string | null;
         role: string;
-        learningPath: import("@prisma/client").$Enums.LearningPath | null;
         lives: number;
         gems: number;
         league: import("@prisma/client").$Enums.League;
         xpTotal: number;
         whatsappOptIn: boolean;
-        createdAt: Date;
         streak: {
             id: string;
             currentStreak: number;
@@ -46,9 +46,9 @@ export declare class UserController {
         id: string;
     }, dto: UpdateProfileDto): Promise<{
         id: string;
+        learningPath: import("@prisma/client").$Enums.LearningPath | null;
         name: string;
         avatarUrl: string | null;
-        learningPath: import("@prisma/client").$Enums.LearningPath | null;
         whatsappOptIn: boolean;
     }>;
 }

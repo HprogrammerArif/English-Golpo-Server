@@ -98,9 +98,9 @@ export declare class ProgressService {
     getMistakes(userId: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         englishText: string;
         banglaText: string;
+        updatedAt: Date;
         type: string;
         userId: string;
         incorrectCount: number;
@@ -109,9 +109,9 @@ export declare class ProgressService {
     addMistake(userId: string, dto: AddMistakeDto): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         englishText: string;
         banglaText: string;
+        updatedAt: Date;
         type: string;
         userId: string;
         incorrectCount: number;
@@ -120,9 +120,9 @@ export declare class ProgressService {
     resolveMistake(userId: string, mistakeId: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         englishText: string;
         banglaText: string;
+        updatedAt: Date;
         type: string;
         userId: string;
         incorrectCount: number;

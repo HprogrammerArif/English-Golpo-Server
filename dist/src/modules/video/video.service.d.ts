@@ -17,18 +17,18 @@ export declare class VideoService {
     getVideos(dto: GetVideosDto): Promise<{
         videos: {
             id: string;
-            learningPath: import("@prisma/client").$Enums.LearningPath;
-            nctbClass: number | null;
-            createdAt: Date;
             title: string;
             titleBn: string;
             description: string;
             descriptionBn: string;
             level: number;
+            learningPath: import("@prisma/client").$Enums.LearningPath;
             isPremium: boolean;
+            nctbClass: number | null;
             durationSeconds: number;
             tags: string[];
             isPublished: boolean;
+            createdAt: Date;
             youtubeId: string;
             thumbnailUrl: string;
         }[];
@@ -41,18 +41,18 @@ export declare class VideoService {
     }>;
     getVideoById(id: string): Promise<{
         id: string;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
-        createdAt: Date;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         durationSeconds: number;
         tags: string[];
         isPublished: boolean;
+        createdAt: Date;
         youtubeId: string;
         thumbnailUrl: string;
     }>;

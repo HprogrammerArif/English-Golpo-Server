@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { IsString, IsOptional, IsInt } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -63,7 +63,7 @@ export class AccountsService {
 
   async linkChild(parentId: string, dto: LinkChildDto) {
     const child = await this.prisma.user.findUnique({ where: { phone: dto.childPhone } });
-    if (!child) throw new Error('Child account not found');
+    if (!child) throw new NotFoundException('Child account not found');
 
     await this.prisma.user.update({
       where: { id: child.id },

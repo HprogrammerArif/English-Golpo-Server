@@ -91,8 +91,11 @@ async function main() {
         });
     }
     console.log(`✅ Admin user: ${adminUser.email} (Phone: ${adminUser.phone})`);
-    const stories = [
-        {
+    await prisma.story.upsert({
+        where: { id: 'the-red-hen' },
+        update: {},
+        create: {
+            id: 'the-red-hen',
             title: 'The Red Hen',
             titleBn: 'লাল মুরগি',
             description: 'A classic story about hard work and sharing.',
@@ -106,8 +109,62 @@ async function main() {
             tags: ['animals', 'kids', 'phonics'],
             isPremium: false,
             isPublished: true,
+            pages: {
+                create: [{
+                        pageIndex: 0,
+                        imageUrl: 'https://placehold.co/800x400/10B981/white?text=The+Red+Hen',
+                        sentences: {
+                            create: [
+                                {
+                                    sentenceIdx: 0,
+                                    englishText: 'Once upon a time, there was a little red hen.',
+                                    banglaText: 'একসময় একটি ছোট্ট লাল মুরগি ছিল।',
+                                    startTime: 0, endTime: 3.5,
+                                    tokens: { create: [
+                                            { english: 'Once', bangla: 'একসময়', sentenceContext: 'Once upon a time', pronunciationG: 'wʌns' },
+                                            { english: 'hen', bangla: 'মুরগি', sentenceContext: 'little red hen', pronunciationG: 'hɛn' },
+                                        ] },
+                                },
+                                {
+                                    sentenceIdx: 1,
+                                    englishText: 'She worked very hard every day.',
+                                    banglaText: 'সে প্রতিদিন অনেক কঠোর পরিশ্রম করত।',
+                                    startTime: 3.5, endTime: 7.0,
+                                    tokens: { create: [
+                                            { english: 'worked', bangla: 'কাজ করত', sentenceContext: 'worked hard', pronunciationG: 'wɜːrkt' },
+                                            { english: 'hard', bangla: 'কঠোর', sentenceContext: 'very hard', pronunciationG: 'hɑːrd' },
+                                        ] },
+                                },
+                            ],
+                        },
+                    }],
+            },
+            quizzes: {
+                create: {
+                    questions: { create: [
+                            {
+                                questionText: 'What color was the hen?',
+                                questionTextBn: 'মুরগিটির রঙ কেমন ছিল?',
+                                options: ['Blue', 'Red', 'Green', 'Yellow'],
+                                correctIndex: 1, explanation: 'The story says "little red hen".', xpReward: 10,
+                            },
+                            {
+                                questionText: 'What did the hen do every day?',
+                                questionTextBn: 'মুরগিটি প্রতিদিন কী করত?',
+                                options: ['Slept', 'Played', 'Worked hard', 'Sang songs'],
+                                correctIndex: 2, explanation: '"She worked very hard every day."', xpReward: 10,
+                            },
+                        ] },
+                },
+            },
         },
-        {
+    });
+    console.log('✅ Story: The Red Hen');
+    await prisma.story.upsert({
+        where: { id: 'the-clever-crow' },
+        update: {},
+        create: {
+            id: 'the-clever-crow',
             title: 'The Clever Crow',
             titleBn: 'চালাক কাক',
             description: 'The crow uses his intelligence to quench his thirst.',
@@ -121,8 +178,62 @@ async function main() {
             tags: ['animals', 'kids', 'thinking'],
             isPremium: false,
             isPublished: true,
+            pages: {
+                create: [{
+                        pageIndex: 0,
+                        imageUrl: 'https://placehold.co/800x400/3B82F6/white?text=The+Clever+Crow',
+                        sentences: {
+                            create: [
+                                {
+                                    sentenceIdx: 0,
+                                    englishText: 'A thirsty crow found a pitcher with a little water.',
+                                    banglaText: 'একটি তৃষ্ণার্ত কাক একটু জলসহ একটি কলস খুঁজে পেল।',
+                                    startTime: 0, endTime: 4.0,
+                                    tokens: { create: [
+                                            { english: 'thirsty', bangla: 'তৃষ্ণার্ত', sentenceContext: 'thirsty crow', pronunciationG: 'ˈθɜːrsti' },
+                                            { english: 'pitcher', bangla: 'কলস', sentenceContext: 'found a pitcher', pronunciationG: 'ˈpɪtʃər' },
+                                        ] },
+                                },
+                                {
+                                    sentenceIdx: 1,
+                                    englishText: 'He dropped pebbles into the pitcher until the water rose.',
+                                    banglaText: 'সে কলসে পাথরের টুকরো ফেলল যতক্ষণ না জল উপরে উঠে এলো।',
+                                    startTime: 4.0, endTime: 8.0,
+                                    tokens: { create: [
+                                            { english: 'pebbles', bangla: 'পাথরের টুকরো', sentenceContext: 'dropped pebbles', pronunciationG: 'ˈpɛbəlz' },
+                                            { english: 'rose', bangla: 'উঠে এলো', sentenceContext: 'water rose', pronunciationG: 'roʊz' },
+                                        ] },
+                                },
+                            ],
+                        },
+                    }],
+            },
+            quizzes: {
+                create: {
+                    questions: { create: [
+                            {
+                                questionText: 'What did the crow want?',
+                                questionTextBn: 'কাকটি কী চেয়েছিল?',
+                                options: ['Food', 'Water', 'A friend', 'A nest'],
+                                correctIndex: 1, explanation: 'The crow was thirsty and wanted water.', xpReward: 10,
+                            },
+                            {
+                                questionText: 'What did the crow drop into the pitcher?',
+                                questionTextBn: 'কাকটি কলসে কী ফেলেছিল?',
+                                options: ['Leaves', 'Sand', 'Pebbles', 'Bread'],
+                                correctIndex: 2, explanation: 'He dropped pebbles to raise the water level.', xpReward: 10,
+                            },
+                        ] },
+                },
+            },
         },
-        {
+    });
+    console.log('✅ Story: The Clever Crow');
+    await prisma.story.upsert({
+        where: { id: 'my-first-day-at-school' },
+        update: {},
+        create: {
+            id: 'my-first-day-at-school',
             title: 'My First Day at School',
             titleBn: 'স্কুলের প্রথম দিন',
             description: 'Rina goes to school for the first time and makes new friends.',
@@ -138,8 +249,62 @@ async function main() {
             tags: ['school', 'nctb', 'class6', 'ssc'],
             isPremium: false,
             isPublished: true,
+            pages: {
+                create: [{
+                        pageIndex: 0,
+                        imageUrl: 'https://placehold.co/800x400/F59E0B/white?text=First+Day+at+School',
+                        sentences: {
+                            create: [
+                                {
+                                    sentenceIdx: 0,
+                                    englishText: 'Rina woke up early on her first day of school.',
+                                    banglaText: 'রিনা স্কুলের প্রথম দিন সকালে তাড়াতাড়ি উঠল।',
+                                    startTime: 0, endTime: 4.0,
+                                    tokens: { create: [
+                                            { english: 'woke up', bangla: 'জেগে উঠল', sentenceContext: 'woke up early', pronunciationG: 'woʊk ʌp' },
+                                            { english: 'early', bangla: 'সকালে', sentenceContext: 'woke up early', pronunciationG: 'ˈɜːrli' },
+                                        ] },
+                                },
+                                {
+                                    sentenceIdx: 1,
+                                    englishText: 'She met a kind teacher and made a new friend named Mim.',
+                                    banglaText: 'সে একজন দয়ালু শিক্ষককে পেল এবং মিম নামে নতুন বন্ধু তৈরি করল।',
+                                    startTime: 4.0, endTime: 8.5,
+                                    tokens: { create: [
+                                            { english: 'kind', bangla: 'দয়ালু', sentenceContext: 'kind teacher', pronunciationG: 'kaɪnd' },
+                                            { english: 'friend', bangla: 'বন্ধু', sentenceContext: 'new friend', pronunciationG: 'frɛnd' },
+                                        ] },
+                                },
+                            ],
+                        },
+                    }],
+            },
+            quizzes: {
+                create: {
+                    questions: { create: [
+                            {
+                                questionText: 'What is the girl\'s name in the story?',
+                                questionTextBn: 'গল্পের মেয়েটির নাম কী?',
+                                options: ['Mim', 'Rina', 'Sara', 'Nadia'],
+                                correctIndex: 1, explanation: 'The main character is Rina.', xpReward: 10,
+                            },
+                            {
+                                questionText: 'What did Rina do on her first day at school?',
+                                questionTextBn: 'প্রথম দিন স্কুলে রিনা কী করেছিল?',
+                                options: ['Cried all day', 'Made a new friend', 'Forgot her bag', 'Skipped class'],
+                                correctIndex: 1, explanation: 'She made a new friend named Mim.', xpReward: 10,
+                            },
+                        ] },
+                },
+            },
         },
-        {
+    });
+    console.log('✅ Story: My First Day at School');
+    await prisma.story.upsert({
+        where: { id: 'job-interview-in-english' },
+        update: {},
+        create: {
+            id: 'job-interview-in-english',
             title: 'Job Interview in English',
             titleBn: 'ইংরেজিতে চাকরির ইন্টারভিউ',
             description: 'Learn the key phrases and vocabulary for a successful job interview.',
@@ -153,8 +318,62 @@ async function main() {
             tags: ['job', 'interview', 'professional', 'bpo'],
             isPremium: true,
             isPublished: true,
+            pages: {
+                create: [{
+                        pageIndex: 0,
+                        imageUrl: 'https://placehold.co/800x400/EF4444/white?text=Job+Interview',
+                        sentences: {
+                            create: [
+                                {
+                                    sentenceIdx: 0,
+                                    englishText: 'Good morning. Please tell me about yourself.',
+                                    banglaText: 'শুভ সকাল। অনুগ্রহ করে নিজের সম্পর্কে বলুন।',
+                                    startTime: 0, endTime: 4.0,
+                                    tokens: { create: [
+                                            { english: 'yourself', bangla: 'নিজের সম্পর্কে', sentenceContext: 'about yourself', pronunciationG: 'jɔːrˈsɛlf' },
+                                            { english: 'morning', bangla: 'সকাল', sentenceContext: 'Good morning', pronunciationG: 'ˈmɔːrnɪŋ' },
+                                        ] },
+                                },
+                                {
+                                    sentenceIdx: 1,
+                                    englishText: 'I am a dedicated and hardworking professional.',
+                                    banglaText: 'আমি একজন নিবেদিতপ্রাণ ও পরিশ্রমী পেশাদার।',
+                                    startTime: 4.0, endTime: 8.0,
+                                    tokens: { create: [
+                                            { english: 'dedicated', bangla: 'নিবেদিতপ্রাণ', sentenceContext: 'dedicated professional', pronunciationG: 'ˈdɛdɪkeɪtɪd' },
+                                            { english: 'hardworking', bangla: 'পরিশ্রমী', sentenceContext: 'hardworking professional', pronunciationG: 'ˈhɑːrdwɜːrkɪŋ' },
+                                        ] },
+                                },
+                            ],
+                        },
+                    }],
+            },
+            quizzes: {
+                create: {
+                    questions: { create: [
+                            {
+                                questionText: 'What is a common opening question in a job interview?',
+                                questionTextBn: 'চাকরির ইন্টারভিউতে সাধারণ প্রথম প্রশ্ন কোনটি?',
+                                options: ['What is your salary?', 'Tell me about yourself.', 'Do you have a car?', 'Where do you live?'],
+                                correctIndex: 1, explanation: '"Tell me about yourself" is the most common interview opener.', xpReward: 10,
+                            },
+                            {
+                                questionText: 'Which word means "very committed to your work"?',
+                                questionTextBn: 'কোন শব্দটির অর্থ "কাজে অত্যন্ত প্রতিশ্রুতিবদ্ধ"?',
+                                options: ['Lazy', 'Dedicated', 'Careless', 'Slow'],
+                                correctIndex: 1, explanation: '"Dedicated" means fully committed to work.', xpReward: 10,
+                            },
+                        ] },
+                },
+            },
         },
-        {
+    });
+    console.log('✅ Story: Job Interview in English');
+    await prisma.story.upsert({
+        where: { id: 'ielts-academic-writing-task-2' },
+        update: {},
+        create: {
+            id: 'ielts-academic-writing-task-2',
             title: 'IELTS Academic Writing Task 2',
             titleBn: 'IELTS একাডেমিক রাইটিং টাস্ক ২',
             description: 'Master the structure and vocabulary for high-band IELTS essays.',
@@ -168,81 +387,62 @@ async function main() {
             tags: ['ielts', 'writing', 'essay', 'academic'],
             isPremium: true,
             isPublished: true,
-        },
-    ];
-    for (const storyData of stories) {
-        const story = await prisma.story.upsert({
-            where: { id: storyData.title.toLowerCase().replace(/ /g, '-') },
-            update: {},
-            create: {
-                id: storyData.title.toLowerCase().replace(/ /g, '-'),
-                ...storyData,
-                pages: {
-                    create: [
-                        {
-                            pageIndex: 0,
-                            imageUrl: storyData.illustrationUrl,
-                            sentences: {
-                                create: [
-                                    {
-                                        sentenceIdx: 0,
-                                        englishText: 'Once upon a time, there was a little red hen.',
-                                        banglaText: 'একসময় একটি ছোট্ট লাল মুরগি ছিল।',
-                                        startTime: 0,
-                                        endTime: 3.5,
-                                        tokens: {
-                                            create: [
-                                                { english: 'Once', bangla: 'একসময়', sentenceContext: 'Once upon a time', pronunciationG: 'wʌns' },
-                                                { english: 'hen', bangla: 'মুরগি', sentenceContext: 'little red hen', pronunciationG: 'hɛn' },
-                                            ],
-                                        },
-                                    },
-                                    {
-                                        sentenceIdx: 1,
-                                        englishText: 'She worked very hard every day.',
-                                        banglaText: 'সে প্রতিদিন অনেক কঠোর পরিশ্রম করত।',
-                                        startTime: 3.5,
-                                        endTime: 7.0,
-                                        tokens: {
-                                            create: [
-                                                { english: 'worked', bangla: 'কাজ করত', sentenceContext: 'worked hard', pronunciationG: 'wɜːrkt' },
-                                                { english: 'hard', bangla: 'কঠোর', sentenceContext: 'very hard', pronunciationG: 'hɑːrd' },
-                                            ],
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                    ],
-                },
-                quizzes: {
-                    create: {
-                        questions: {
+            pages: {
+                create: [{
+                        pageIndex: 0,
+                        imageUrl: 'https://placehold.co/800x400/8B5CF6/white?text=IELTS+Writing',
+                        sentences: {
                             create: [
                                 {
-                                    questionText: 'What color was the hen?',
-                                    questionTextBn: 'মুরগিটির রঙ কেমন ছিল?',
-                                    options: ['Blue', 'Red', 'Green', 'Yellow'],
-                                    correctIndex: 1,
-                                    explanation: 'The story says "little red hen".',
-                                    xpReward: 10,
+                                    sentenceIdx: 0,
+                                    englishText: 'In IELTS Task 2, you must write an essay of at least 250 words.',
+                                    banglaText: 'IELTS টাস্ক ২-এ আপনাকে কমপক্ষে ২৫০ শব্দের একটি রচনা লিখতে হবে।',
+                                    startTime: 0, endTime: 5.0,
+                                    tokens: { create: [
+                                            { english: 'essay', bangla: 'রচনা', sentenceContext: 'write an essay', pronunciationG: 'ˈɛseɪ' },
+                                            { english: 'words', bangla: 'শব্দ', sentenceContext: '250 words', pronunciationG: 'wɜːrdz' },
+                                        ] },
                                 },
                                 {
-                                    questionText: 'What did the hen do every day?',
-                                    questionTextBn: 'মুরগিটি প্রতিদিন কী করত?',
-                                    options: ['Slept', 'Played', 'Worked hard', 'Sang songs'],
-                                    correctIndex: 2,
-                                    explanation: '"She worked very hard every day."',
-                                    xpReward: 10,
+                                    sentenceIdx: 1,
+                                    englishText: 'Use a clear introduction, body paragraphs, and a conclusion.',
+                                    banglaText: 'একটি স্পষ্ট ভূমিকা, মূল অনুচ্ছেদ এবং উপসংহার ব্যবহার করুন।',
+                                    startTime: 5.0, endTime: 10.0,
+                                    tokens: { create: [
+                                            { english: 'introduction', bangla: 'ভূমিকা', sentenceContext: 'clear introduction', pronunciationG: 'ˌɪntrəˈdʌkʃən' },
+                                            { english: 'conclusion', bangla: 'উপসংহার', sentenceContext: 'a conclusion', pronunciationG: 'kənˈkluːʒən' },
+                                        ] },
                                 },
                             ],
                         },
-                    },
+                    }],
+            },
+            quizzes: {
+                create: {
+                    questions: { create: [
+                            {
+                                questionText: 'What is the minimum word count for IELTS Task 2?',
+                                questionTextBn: 'IELTS টাস্ক ২-এর জন্য সর্বনিম্ন শব্দ সংখ্যা কত?',
+                                options: ['150 words', '200 words', '250 words', '300 words'],
+                                correctIndex: 2, explanation: 'IELTS Task 2 requires at least 250 words.', xpReward: 10,
+                            },
+                            {
+                                questionText: 'What are the three main parts of an IELTS essay?',
+                                questionTextBn: 'IELTS রচনার তিনটি মূল অংশ কী কী?',
+                                options: [
+                                    'Title, story, ending',
+                                    'Introduction, body, conclusion',
+                                    'Problem, solution, examples',
+                                    'Thesis, antithesis, synthesis'
+                                ],
+                                correctIndex: 1, explanation: 'A standard essay has introduction, body paragraphs, and conclusion.', xpReward: 10,
+                            },
+                        ] },
                 },
             },
-        });
-        console.log(`✅ Story: ${story.title}`);
-    }
+        },
+    });
+    console.log('✅ Story: IELTS Academic Writing Task 2');
     console.log('🌱 Seeding Sentence Patterns...');
     const patterns = [
         {

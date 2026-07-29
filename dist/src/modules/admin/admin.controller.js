@@ -48,6 +48,12 @@ let AdminController = class AdminController {
     deleteStory(id) {
         return this.adminService.deleteStory(id);
     }
+    getStoryDetail(id) {
+        return this.adminService.getStoryDetail(id);
+    }
+    regenerateStoryContent(id) {
+        return this.adminService.regenerateStoryContent(id);
+    }
     addPageToStory(storyId, body) {
         return this.adminService.addPageToStory(storyId, body.pageIndex, body.imageUrl);
     }
@@ -153,6 +159,22 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "deleteStory", null);
+__decorate([
+    (0, common_1.Get)('stories/:id/detail'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get full story detail with all pages, sentences and word tokens' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getStoryDetail", null);
+__decorate([
+    (0, common_1.Post)('stories/:id/regenerate'),
+    (0, swagger_1.ApiOperation)({ summary: 'Regenerate story pages, sentences and vocab tokens from description' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "regenerateStoryContent", null);
 __decorate([
     (0, common_1.Post)('stories/:id/pages'),
     (0, swagger_1.ApiOperation)({ summary: 'Add a new page to story' }),

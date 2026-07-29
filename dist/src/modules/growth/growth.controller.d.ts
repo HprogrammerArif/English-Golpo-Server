@@ -13,6 +13,8 @@ export declare class GrowthController {
         deepLink: string;
         shareUrl: string;
         message: string;
+        referralLink: string;
+        shareMessage: string;
     }>;
     redeemReferral(user: {
         id: string;
@@ -38,6 +40,8 @@ export declare class GrowthController {
             appDeepLink: string;
         };
         whatsappText: string;
+        shareText: string;
+        scoreCardUrl: string;
     }>;
     trackEvent(user: {
         id: string;

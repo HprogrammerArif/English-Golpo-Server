@@ -5,18 +5,18 @@ export declare class VideoController {
     getVideos(path?: string, level?: number, page?: number, limit?: number): Promise<{
         videos: {
             id: string;
-            learningPath: import("@prisma/client").$Enums.LearningPath;
-            nctbClass: number | null;
-            createdAt: Date;
             title: string;
             titleBn: string;
             description: string;
             descriptionBn: string;
             level: number;
+            learningPath: import("@prisma/client").$Enums.LearningPath;
             isPremium: boolean;
+            nctbClass: number | null;
             durationSeconds: number;
             tags: string[];
             isPublished: boolean;
+            createdAt: Date;
             youtubeId: string;
             thumbnailUrl: string;
         }[];
@@ -27,7 +27,9 @@ export declare class VideoController {
             totalPages: number;
         };
     }>;
-    getMyProgress(req: any): Promise<({
+    getMyProgress(user: {
+        id: string;
+    }): Promise<({
         video: {
             id: string;
             title: string;
@@ -46,22 +48,24 @@ export declare class VideoController {
     })[]>;
     getVideo(id: string): Promise<{
         id: string;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
-        createdAt: Date;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         durationSeconds: number;
         tags: string[];
         isPublished: boolean;
+        createdAt: Date;
         youtubeId: string;
         thumbnailUrl: string;
     }>;
-    trackProgress(req: any, dto: TrackVideoProgressDto): Promise<{
+    trackProgress(user: {
+        id: string;
+    }, dto: TrackVideoProgressDto): Promise<{
         id: string;
         updatedAt: Date;
         userId: string;

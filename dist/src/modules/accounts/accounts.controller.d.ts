@@ -32,8 +32,8 @@ export declare class AccountsController {
         id: string;
     }, dto: ProvisionB2BDto): Promise<{
         id: string;
-        name: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         type: string;
         licenseCount: number;

@@ -38,6 +38,9 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 exports.default = (0, config_1.defineConfig)({
     schema: 'prisma/schema.prisma',
+    migrations: {
+        seed: 'ts-node prisma/seed.ts',
+    },
     datasource: {
         url: (0, config_1.env)('DATABASE_URL'),
     },

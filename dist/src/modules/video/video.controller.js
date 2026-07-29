@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const video_service_1 = require("./video.service");
 const swagger_1 = require("@nestjs/swagger");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 let VideoController = class VideoController {
     videoService;
     constructor(videoService) {
@@ -25,14 +26,14 @@ let VideoController = class VideoController {
     getVideos(path, level, page, limit) {
         return this.videoService.getVideos({ path: path, level: level ? +level : undefined, page, limit });
     }
-    getMyProgress(req) {
-        return this.videoService.getUserVideoProgress(req.user.sub);
+    getMyProgress(user) {
+        return this.videoService.getUserVideoProgress(user.id);
     }
     getVideo(id) {
         return this.videoService.getVideoById(id);
     }
-    trackProgress(req, dto) {
-        return this.videoService.trackProgress(req.user.sub, dto);
+    trackProgress(user, dto) {
+        return this.videoService.trackProgress(user.id, dto);
     }
 };
 exports.VideoController = VideoController;
@@ -54,7 +55,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('my-progress'),
     (0, swagger_1.ApiOperation)({ summary: 'Get current user video watch progress' }),
-    __param(0, (0, common_1.Request)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
@@ -70,7 +71,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('progress'),
     (0, swagger_1.ApiOperation)({ summary: 'Track video watch progress and award XP on completion' }),
-    __param(0, (0, common_1.Request)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, video_service_1.TrackVideoProgressDto]),

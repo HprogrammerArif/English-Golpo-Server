@@ -29,6 +29,8 @@ export class GrowthService {
       deepLink: `engolpo://referral/${code}`,
       shareUrl: `${baseUrl}/join/${code}`,
       message: `ইংলিশ গল্প অ্যাপে জয়েন করো! আমার লিংক দিয়ে সাইন আপ করলে তুমি ৭ দিন ফ্রি Premium পাবে 🎉 ${baseUrl}/join/${code}`,
+      referralLink: `${baseUrl}/join/${code}`, // for RN compatibility
+      shareMessage: `ইংলিশ গল্প অ্যাপে জয়েন করো! আমার লিংক দিয়ে সাইন আপ করলে তুমি ৭ দিন ফ্রি Premium পাবে 🎉 ${baseUrl}/join/${code}`, // for RN compatibility
     };
   }
 
@@ -95,6 +97,8 @@ export class GrowthService {
         // imageUrl: generated via Cloudinary in production
       },
       whatsappText: `🇧🇩 ইংলিশ গল্পে "${story?.title}" পড়লাম! Score: ${score}/100 🎯\nতুমিও পড়ো: engolpo://stories/${storyId}`,
+      shareText: `🇧🇩 ইংলিশ গল্পে "${story?.title}" পড়লাম! Score: ${score}/100 🎯\nতুমিও পড়ো: engolpo://stories/${storyId}`, // for RN compatibility
+      scoreCardUrl: story?.illustrationUrl || '', // for RN compatibility fallback
     };
   }
 

@@ -1,10 +1,11 @@
 import {
   Controller, Get, Post, Param, Body, Query,
-  UseGuards, Request, ParseIntPipe, DefaultValuePipe,
+  UseGuards, ParseIntPipe, DefaultValuePipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { VideoService, GetVideosDto, TrackVideoProgressDto } from './video.service';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('video')
 @ApiBearerAuth()
@@ -30,8 +31,8 @@ export class VideoController {
 
   @Get('my-progress')
   @ApiOperation({ summary: 'Get current user video watch progress' })
-  getMyProgress(@Request() req: any) {
-    return this.videoService.getUserVideoProgress(req.user.sub);
+  getMyProgress(@CurrentUser() user: { id: string }) {
+    return this.videoService.getUserVideoProgress(user.id);
   }
 
   @Get(':id')
@@ -42,7 +43,7 @@ export class VideoController {
 
   @Post('progress')
   @ApiOperation({ summary: 'Track video watch progress and award XP on completion' })
-  trackProgress(@Request() req: any, @Body() dto: TrackVideoProgressDto) {
-    return this.videoService.trackProgress(req.user.sub, dto);
+  trackProgress(@CurrentUser() user: { id: string }, @Body() dto: TrackVideoProgressDto) {
+    return this.videoService.trackProgress(user.id, dto);
   }
 }

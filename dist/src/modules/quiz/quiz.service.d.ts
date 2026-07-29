@@ -14,9 +14,9 @@ export declare class QuizService {
             xpReward: number;
         }[];
     } & {
+        storyId: string;
         id: string;
         createdAt: Date;
-        storyId: string;
     }>;
     submitQuiz(userId: string, storyId: string, dto: SubmitQuizDto): Promise<{
         score: number;

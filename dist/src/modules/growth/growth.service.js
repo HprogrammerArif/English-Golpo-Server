@@ -54,6 +54,8 @@ let GrowthService = class GrowthService {
             deepLink: `engolpo://referral/${code}`,
             shareUrl: `${baseUrl}/join/${code}`,
             message: `ইংলিশ গল্প অ্যাপে জয়েন করো! আমার লিংক দিয়ে সাইন আপ করলে তুমি ৭ দিন ফ্রি Premium পাবে 🎉 ${baseUrl}/join/${code}`,
+            referralLink: `${baseUrl}/join/${code}`,
+            shareMessage: `ইংলিশ গল্প অ্যাপে জয়েন করো! আমার লিংক দিয়ে সাইন আপ করলে তুমি ৭ দিন ফ্রি Premium পাবে 🎉 ${baseUrl}/join/${code}`,
         };
     }
     async redeemReferral(refereeId, code) {
@@ -106,6 +108,8 @@ let GrowthService = class GrowthService {
                 appDeepLink: `engolpo://stories/${storyId}`,
             },
             whatsappText: `🇧🇩 ইংলিশ গল্পে "${story?.title}" পড়লাম! Score: ${score}/100 🎯\nতুমিও পড়ো: engolpo://stories/${storyId}`,
+            shareText: `🇧🇩 ইংলিশ গল্পে "${story?.title}" পড়লাম! Score: ${score}/100 🎯\nতুমিও পড়ো: engolpo://stories/${storyId}`,
+            scoreCardUrl: story?.illustrationUrl || '',
         };
     }
     async trackEvent(userId, dto) {

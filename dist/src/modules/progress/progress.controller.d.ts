@@ -82,9 +82,9 @@ export declare class ProgressController {
     }): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         englishText: string;
         banglaText: string;
+        updatedAt: Date;
         type: string;
         userId: string;
         incorrectCount: number;
@@ -95,9 +95,9 @@ export declare class ProgressController {
     }, dto: AddMistakeDto): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         englishText: string;
         banglaText: string;
+        updatedAt: Date;
         type: string;
         userId: string;
         incorrectCount: number;
@@ -108,9 +108,9 @@ export declare class ProgressController {
     }, dto: ResolveMistakeDto): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         englishText: string;
         banglaText: string;
+        updatedAt: Date;
         type: string;
         userId: string;
         incorrectCount: number;

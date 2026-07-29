@@ -98,7 +98,7 @@ let AccountsService = class AccountsService {
     async linkChild(parentId, dto) {
         const child = await this.prisma.user.findUnique({ where: { phone: dto.childPhone } });
         if (!child)
-            throw new Error('Child account not found');
+            throw new common_1.NotFoundException('Child account not found');
         await this.prisma.user.update({
             where: { id: child.id },
             data: { parentId },

@@ -11,9 +11,9 @@ export declare class QuizController {
             xpReward: number;
         }[];
     } & {
+        storyId: string;
         id: string;
         createdAt: Date;
-        storyId: string;
     }>;
     submitQuiz(storyId: string, user: {
         id: string;

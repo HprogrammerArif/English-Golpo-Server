@@ -92,6 +92,18 @@ export class AdminController {
     return this.adminService.deleteStory(id);
   }
 
+  @Get('stories/:id/detail')
+  @ApiOperation({ summary: 'Get full story detail with all pages, sentences and word tokens' })
+  getStoryDetail(@Param('id') id: string) {
+    return this.adminService.getStoryDetail(id);
+  }
+
+  @Post('stories/:id/regenerate')
+  @ApiOperation({ summary: 'Regenerate story pages, sentences and vocab tokens from description' })
+  regenerateStoryContent(@Param('id') id: string) {
+    return this.adminService.regenerateStoryContent(id);
+  }
+
   @Post('stories/:id/pages')
   @ApiOperation({ summary: 'Add a new page to story' })
   addPageToStory(

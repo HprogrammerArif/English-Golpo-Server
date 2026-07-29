@@ -48,6 +48,13 @@ enum OtpPurpose {
   REGISTER
 }
 
+enum VideoType {
+  YOUTUBE
+  ILLUSTRATION
+  PARENT
+  PUBLIC
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
@@ -101,6 +108,9 @@ model User {
   flashcardReviews  FlashcardReview[]
   mistakes          UserMistake[]
   videoProgress     VideoProgress[]
+  contributions      Contribution[]
+  contributedVideos  VideoLesson[]      @relation("VideoContributor")
+  parentVideos       VideoLesson[]      @relation("VideoTargetChild")
 }
 
 model OtpRequest {
@@ -441,36 +451,63 @@ model UserMistake {
 }
 
 model VideoLesson {
-  id            String         @id @default(uuid())
-  title         String
-  titleBn       String
-  description   String
-  descriptionBn String
-  youtubeId     String         // YouTube video ID (embedded player)
-  thumbnailUrl  String
-  durationSeconds Int          @default(0)
-  learningPath  LearningPath
-  level         Int            @default(1)  // 1=Beginner..4=Advanced
-  nctbClass     Int?
-  tags          String[]
-  isPremium     Boolean        @default(false)
-  isPublished   Boolean        @default(false)
-  createdAt     DateTime       @default(now())
+  id              String         @id @default(uuid())
+  title           String
+  titleBn         String
+  description     String
+  descriptionBn   String
+  youtubeId       String?        // Optional for native uploads
+  thumbnailUrl    String
+  durationSeconds Int            @default(0)
+  learningPath    LearningPath
+  level           Int            @default(1)  // 1=Beginner..4=Advanced
+  nctbClass       Int?
+  tags            String[]
+  isPremium       Boolean        @default(false)
+  isPublished     Boolean        @default(false)
+  videoType       VideoType      @default(YOUTUBE)
+  videoUrl        String?        // For raw video files (MP4/Cloudinary)
+  contributorId   String?
+  contributor     User?          @relation("VideoContributor", fields: [contributorId], references: [id])
+  targetChildId   String?
+  targetChild     User?          @relation("VideoTargetChild", fields: [targetChildId], references: [id])
+  approved        Boolean        @default(true)
+  payoutAmount    Float          @default(0.0)
+  payoutStatus    String         @default("NOT_APPLICABLE") // NOT_APPLICABLE | UNPAID | PAID
+  createdAt       DateTime       @default(now())
 
-  progress      VideoProgress[]
+  progress        VideoProgress[]
 }
 
 model VideoProgress {
-  id          String      @id @default(uuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoId     String
-  video       VideoLesson @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  watchedSeconds Int      @default(0)
-  completed   Boolean     @default(false)
-  xpEarned    Int         @default(0)
-  updatedAt   DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoId        String
+  video          VideoLesson @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  watchedSeconds Int         @default(0)
+  completed      Boolean     @default(false)
+  xpEarned       Int         @default(0)
+  updatedAt      DateTime    @updatedAt
 
   @@unique([userId, videoId])
   @@index([userId])
+}
+
+model Contribution {
+  id             String       @id @default(uuid())
+  contributorId  String
+  contributor    User         @relation(fields: [contributorId], references: [id], onDelete: Cascade)
+  contentType    String       // VIDEO | AUDIO | ILLUSTRATION
+  title          String
+  description    String?
+  fileUrl        String       // Link to Cloudinary or uploaded media file
+  targetChildId  String?
+  status         String       @default("PENDING") // PENDING | APPROVED | REJECTED
+  payoutAmount   Float        @default(0.0)
+  payoutStatus   String       @default("NOT_APPLICABLE") // NOT_APPLICABLE | UNPAID | PAID
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([contributorId])
 }

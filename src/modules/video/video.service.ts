@@ -9,6 +9,7 @@ export class GetVideosDto {
   @ApiPropertyOptional() @IsOptional() @IsNumber() level?: number;
   @ApiPropertyOptional() @IsOptional() @IsNumber() page?: number;
   @ApiPropertyOptional() @IsOptional() @IsNumber() limit?: number;
+  @ApiPropertyOptional() @IsOptional() @IsString() type?: string;
 }
 
 export class TrackVideoProgressDto {
@@ -21,13 +22,26 @@ export class TrackVideoProgressDto {
 export class VideoService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getVideos(dto: GetVideosDto) {
-    const { path, level, page = 1, limit = 20 } = dto;
+  async getVideos(userId: string, dto: GetVideosDto) {
+    const { path, level, page = 1, limit = 20, type } = dto;
     const skip = (page - 1) * limit;
 
-    const where: any = { isPublished: true };
+    const where: any = { approved: true, isPublished: true };
     if (path) where.learningPath = path;
     if (level) where.level = level;
+
+    if (type) {
+      where.videoType = type;
+      if (type === 'PARENT') {
+        where.targetChildId = userId;
+        // Parent uploads are instantly available to their specific children without waiting for admin approval/isPublished flags
+        delete where.approved;
+        delete where.isPublished;
+      }
+    } else {
+      // By default, only retrieve public learning content (YouTube & approved User public uploads)
+      where.videoType = { in: ['YOUTUBE', 'PUBLIC'] };
+    }
 
     const [videos, total] = await this.prisma.$transaction([
       this.prisma.videoLesson.findMany({

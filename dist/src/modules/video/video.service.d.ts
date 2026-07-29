@@ -5,6 +5,7 @@ export declare class GetVideosDto {
     level?: number;
     page?: number;
     limit?: number;
+    type?: string;
 }
 export declare class TrackVideoProgressDto {
     videoId: string;
@@ -14,7 +15,7 @@ export declare class TrackVideoProgressDto {
 export declare class VideoService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    getVideos(dto: GetVideosDto): Promise<{
+    getVideos(userId: string, dto: GetVideosDto): Promise<{
         videos: {
             id: string;
             title: string;
@@ -29,8 +30,15 @@ export declare class VideoService {
             tags: string[];
             isPublished: boolean;
             createdAt: Date;
-            youtubeId: string;
+            youtubeId: string | null;
             thumbnailUrl: string;
+            videoType: import("@prisma/client").$Enums.VideoType;
+            videoUrl: string | null;
+            contributorId: string | null;
+            targetChildId: string | null;
+            approved: boolean;
+            payoutAmount: number;
+            payoutStatus: string;
         }[];
         pagination: {
             page: number;
@@ -53,8 +61,15 @@ export declare class VideoService {
         tags: string[];
         isPublished: boolean;
         createdAt: Date;
-        youtubeId: string;
+        youtubeId: string | null;
         thumbnailUrl: string;
+        videoType: import("@prisma/client").$Enums.VideoType;
+        videoUrl: string | null;
+        contributorId: string | null;
+        targetChildId: string | null;
+        approved: boolean;
+        payoutAmount: number;
+        payoutStatus: string;
     }>;
     getUserVideoProgress(userId: string): Promise<({
         video: {

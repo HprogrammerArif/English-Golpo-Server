@@ -20,13 +20,22 @@ export class VideoController {
   @ApiQuery({ name: 'level', required: false, type: Number })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'type', required: false })
   getVideos(
+    @CurrentUser() user: { id: string },
     @Query('path') path?: string,
     @Query('level', new DefaultValuePipe(undefined)) level?: number,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
+    @Query('type') type?: string,
   ) {
-    return this.videoService.getVideos({ path: path as any, level: level ? +level : undefined, page, limit });
+    return this.videoService.getVideos(user.id, {
+      path: path as any,
+      level: level ? +level : undefined,
+      page,
+      limit,
+      type,
+    });
   }
 
   @Get('my-progress')

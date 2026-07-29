@@ -876,4 +876,114 @@ Text: ${combinedText.slice(0, 1000)}`;
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  // ─── Contributions ──────────────────────────────────────────────────────────
+  async getContributions(query: { status?: string; page?: number; limit?: number }) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.status) where.status = query.status;
+
+    const [contributions, total] = await this.prisma.$transaction([
+      this.prisma.contribution.findMany({
+        where,
+        include: {
+          contributor: { select: { id: true, name: true, email: true, phone: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.contribution.count({ where }),
+    ]);
+
+    return {
+      contributions,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async approveContribution(id: string, body: { payoutAmount?: number }) {
+    const contribution = await this.prisma.contribution.findUnique({
+      where: { id },
+    });
+    if (!contribution) throw new NotFoundException('Contribution not found');
+
+    const payoutAmount = Number(body.payoutAmount) || 0;
+    const isPrivateParent = contribution.contentType === 'VIDEO' && contribution.targetChildId != null;
+    const payoutStatus = isPrivateParent ? 'NOT_APPLICABLE' : 'UNPAID';
+
+    // Update contribution status
+    const updated = await this.prisma.contribution.update({
+      where: { id },
+      data: {
+        status: 'APPROVED',
+        payoutAmount,
+        payoutStatus,
+      },
+    });
+
+    // If it's a VIDEO contribution, automatically provision/create a VideoLesson
+    if (contribution.contentType === 'VIDEO') {
+      await this.prisma.videoLesson.create({
+        data: {
+          title: contribution.title,
+          titleBn: contribution.title,
+          description: contribution.description || 'Contributed Video',
+          descriptionBn: contribution.description || 'অবদানকৃত ভিডিও',
+          youtubeId: null, // direct MP4 player used
+          thumbnailUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400', // default cover
+          videoType: isPrivateParent ? 'PARENT' : 'PUBLIC',
+          videoUrl: contribution.fileUrl,
+          learningPath: 'KIDS',
+          level: 1,
+          isPremium: false,
+          isPublished: true,
+          approved: true,
+          contributorId: contribution.contributorId,
+          targetChildId: contribution.targetChildId,
+          payoutAmount,
+          payoutStatus,
+        },
+      });
+    }
+
+    return updated;
+  }
+
+  async rejectContribution(id: string) {
+    const contribution = await this.prisma.contribution.findUnique({ where: { id } });
+    if (!contribution) throw new NotFoundException('Contribution not found');
+
+    return this.prisma.contribution.update({
+      where: { id },
+      data: {
+        status: 'REJECTED',
+        payoutStatus: 'NOT_APPLICABLE',
+      },
+    });
+  }
+
+  async markContributionPayoutPaid(id: string) {
+    const contribution = await this.prisma.contribution.findUnique({ where: { id } });
+    if (!contribution) throw new NotFoundException('Contribution not found');
+
+    // Update the contribution payout
+    const updated = await this.prisma.contribution.update({
+      where: { id },
+      data: { payoutStatus: 'PAID' },
+    });
+
+    // Also update the linked VideoLesson payout if it was a Video contribution
+    if (contribution.contentType === 'VIDEO') {
+      await this.prisma.videoLesson.updateMany({
+        where: { contributorId: contribution.contributorId, videoUrl: contribution.fileUrl },
+        data: { payoutStatus: 'PAID' },
+      });
+    }
+
+    return updated;
+  }
 }

@@ -38,21 +38,21 @@ export declare class AdminService {
         limit?: number;
     }): Promise<{
         users: {
-            role: string;
             id: string;
+            learningPath: import("@prisma/client").$Enums.LearningPath | null;
             createdAt: Date;
             name: string;
             email: string | null;
             phone: string | null;
-            learningPath: import("@prisma/client").$Enums.LearningPath | null;
+            role: string;
             lives: number;
             gems: number;
             league: import("@prisma/client").$Enums.League;
             xpTotal: number;
             subscriptions: {
+                expiryDate: Date;
                 gateway: import("@prisma/client").$Enums.PaymentGateway;
                 planType: string;
-                expiryDate: Date;
             }[];
         }[];
         pagination: {
@@ -63,16 +63,16 @@ export declare class AdminService {
         };
     }>;
     updateUserRole(userId: string, role: 'FREE' | 'PREMIUM' | 'ADMIN'): Promise<{
-        role: string;
         id: string;
+        learningPath: import("@prisma/client").$Enums.LearningPath | null;
+        nctbClass: number | null;
         createdAt: Date;
         name: string;
         email: string | null;
         phone: string | null;
         passwordHash: string | null;
         avatarUrl: string | null;
-        learningPath: import("@prisma/client").$Enums.LearningPath | null;
-        nctbClass: number | null;
+        role: string;
         lives: number;
         gems: number;
         league: import("@prisma/client").$Enums.League;
@@ -88,16 +88,16 @@ export declare class AdminService {
         lives?: number;
         xpTotal?: number;
     }): Promise<{
-        role: string;
         id: string;
+        learningPath: import("@prisma/client").$Enums.LearningPath | null;
+        nctbClass: number | null;
         createdAt: Date;
         name: string;
         email: string | null;
         phone: string | null;
         passwordHash: string | null;
         avatarUrl: string | null;
-        learningPath: import("@prisma/client").$Enums.LearningPath | null;
-        nctbClass: number | null;
+        role: string;
         lives: number;
         gems: number;
         league: import("@prisma/client").$Enums.League;
@@ -116,60 +116,60 @@ export declare class AdminService {
         limit?: number;
     }): Promise<{
         stories: ({
-            _count: {
-                pages: number;
-                quizzes: number;
-            };
             pages: ({
                 sentences: {
                     id: string;
-                    pageId: string;
                     sentenceIdx: number;
                     englishText: string;
                     banglaText: string;
                     startTime: number;
                     endTime: number;
+                    pageId: string;
                 }[];
             } & {
+                storyId: string;
                 id: string;
                 pageIndex: number;
-                storyId: string;
                 imageUrl: string;
             })[];
             quizzes: ({
                 questions: {
                     id: string;
-                    quizId: string;
                     questionText: string;
                     questionTextBn: string | null;
                     options: string[];
                     correctIndex: number;
                     explanation: string | null;
                     xpReward: number;
+                    quizId: string;
                 }[];
             } & {
+                storyId: string;
                 id: string;
                 createdAt: Date;
-                storyId: string;
             })[];
+            _count: {
+                pages: number;
+                quizzes: number;
+            };
         } & {
-            isPublished: boolean;
             id: string;
-            createdAt: Date;
-            learningPath: import("@prisma/client").$Enums.LearningPath;
-            nctbClass: number | null;
             title: string;
             titleBn: string;
             description: string;
             descriptionBn: string;
             level: number;
+            learningPath: import("@prisma/client").$Enums.LearningPath;
             isPremium: boolean;
+            nctbClass: number | null;
             nctbUnit: string | null;
             illustrationUrl: string;
             audioUrl: string;
             durationSeconds: number;
             wordCount: number;
             tags: string[];
+            isPublished: boolean;
+            createdAt: Date;
         })[];
         pagination: {
             page: number;
@@ -183,192 +183,192 @@ export declare class AdminService {
             sentences: ({
                 tokens: {
                     id: string;
-                    sentenceId: string;
                     english: string;
                     bangla: string;
                     sentenceContext: string;
                     pronunciationG: string | null;
+                    sentenceId: string;
                 }[];
             } & {
                 id: string;
-                pageId: string;
                 sentenceIdx: number;
                 englishText: string;
                 banglaText: string;
                 startTime: number;
                 endTime: number;
+                pageId: string;
             })[];
         } & {
+            storyId: string;
             id: string;
             pageIndex: number;
-            storyId: string;
             imageUrl: string;
         })[];
         quizzes: ({
             questions: {
                 id: string;
-                quizId: string;
                 questionText: string;
                 questionTextBn: string | null;
                 options: string[];
                 correctIndex: number;
                 explanation: string | null;
                 xpReward: number;
+                quizId: string;
             }[];
         } & {
+            storyId: string;
             id: string;
             createdAt: Date;
-            storyId: string;
         })[];
     } & {
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         nctbUnit: string | null;
         illustrationUrl: string;
         audioUrl: string;
         durationSeconds: number;
         wordCount: number;
         tags: string[];
+        isPublished: boolean;
+        createdAt: Date;
     }) | null>;
     getStoryDetail(storyId: string): Promise<{
-        _count: {
-            pages: number;
-            quizzes: number;
-        };
         pages: ({
             sentences: ({
                 tokens: {
                     id: string;
-                    sentenceId: string;
                     english: string;
                     bangla: string;
                     sentenceContext: string;
                     pronunciationG: string | null;
+                    sentenceId: string;
                 }[];
             } & {
                 id: string;
-                pageId: string;
                 sentenceIdx: number;
                 englishText: string;
                 banglaText: string;
                 startTime: number;
                 endTime: number;
+                pageId: string;
             })[];
         } & {
+            storyId: string;
             id: string;
             pageIndex: number;
-            storyId: string;
             imageUrl: string;
         })[];
         quizzes: ({
             questions: {
                 id: string;
-                quizId: string;
                 questionText: string;
                 questionTextBn: string | null;
                 options: string[];
                 correctIndex: number;
                 explanation: string | null;
                 xpReward: number;
+                quizId: string;
             }[];
         } & {
+            storyId: string;
             id: string;
             createdAt: Date;
-            storyId: string;
         })[];
+        _count: {
+            pages: number;
+            quizzes: number;
+        };
     } & {
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         nctbUnit: string | null;
         illustrationUrl: string;
         audioUrl: string;
         durationSeconds: number;
         wordCount: number;
         tags: string[];
+        isPublished: boolean;
+        createdAt: Date;
     }>;
     autoGenerateContent(storyId: string): Promise<void>;
     regenerateStoryContent(storyId: string): Promise<({
-        _count: {
-            pages: number;
-            quizzes: number;
-        };
         pages: ({
             sentences: ({
                 tokens: {
                     id: string;
-                    sentenceId: string;
                     english: string;
                     bangla: string;
                     sentenceContext: string;
                     pronunciationG: string | null;
+                    sentenceId: string;
                 }[];
             } & {
                 id: string;
-                pageId: string;
                 sentenceIdx: number;
                 englishText: string;
                 banglaText: string;
                 startTime: number;
                 endTime: number;
+                pageId: string;
             })[];
         } & {
+            storyId: string;
             id: string;
             pageIndex: number;
-            storyId: string;
             imageUrl: string;
         })[];
         quizzes: ({
             questions: {
                 id: string;
-                quizId: string;
                 questionText: string;
                 questionTextBn: string | null;
                 options: string[];
                 correctIndex: number;
                 explanation: string | null;
                 xpReward: number;
+                quizId: string;
             }[];
         } & {
+            storyId: string;
             id: string;
             createdAt: Date;
-            storyId: string;
         })[];
+        _count: {
+            pages: number;
+            quizzes: number;
+        };
     } & {
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         nctbUnit: string | null;
         illustrationUrl: string;
         audioUrl: string;
         durationSeconds: number;
         wordCount: number;
         tags: string[];
+        isPublished: boolean;
+        createdAt: Date;
     }) | null>;
     private splitRawSentences;
     private splitIntoSentences;
@@ -378,47 +378,47 @@ export declare class AdminService {
     private readonly vocabDict;
     private _generatePagesAndTokens;
     updateStory(id: string, data: any): Promise<{
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         nctbUnit: string | null;
         illustrationUrl: string;
         audioUrl: string;
         durationSeconds: number;
         wordCount: number;
         tags: string[];
+        isPublished: boolean;
+        createdAt: Date;
     }>;
     deleteStory(id: string): Promise<{
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         nctbUnit: string | null;
         illustrationUrl: string;
         audioUrl: string;
         durationSeconds: number;
         wordCount: number;
         tags: string[];
+        isPublished: boolean;
+        createdAt: Date;
     }>;
     addPageToStory(storyId: string, pageIndex: number, imageUrl: string): Promise<{
+        storyId: string;
         id: string;
         pageIndex: number;
-        storyId: string;
         imageUrl: string;
     }>;
     addSentenceToPage(pageId: string, data: {
@@ -429,12 +429,12 @@ export declare class AdminService {
         endTime: number;
     }): Promise<{
         id: string;
-        pageId: string;
         sentenceIdx: number;
         englishText: string;
         banglaText: string;
         startTime: number;
         endTime: number;
+        pageId: string;
     }>;
     getAdminVideos(query: {
         search?: string;
@@ -443,21 +443,28 @@ export declare class AdminService {
         limit?: number;
     }): Promise<{
         videos: {
-            isPublished: boolean;
             id: string;
-            createdAt: Date;
-            learningPath: import("@prisma/client").$Enums.LearningPath;
-            nctbClass: number | null;
             title: string;
             titleBn: string;
             description: string;
             descriptionBn: string;
             level: number;
+            learningPath: import("@prisma/client").$Enums.LearningPath;
             isPremium: boolean;
+            nctbClass: number | null;
             durationSeconds: number;
             tags: string[];
-            youtubeId: string;
+            isPublished: boolean;
+            createdAt: Date;
+            youtubeId: string | null;
             thumbnailUrl: string;
+            videoType: import("@prisma/client").$Enums.VideoType;
+            videoUrl: string | null;
+            contributorId: string | null;
+            targetChildId: string | null;
+            approved: boolean;
+            payoutAmount: number;
+            payoutStatus: string;
         }[];
         pagination: {
             page: number;
@@ -467,55 +474,76 @@ export declare class AdminService {
         };
     }>;
     createVideo(data: any): Promise<{
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         durationSeconds: number;
         tags: string[];
-        youtubeId: string;
+        isPublished: boolean;
+        createdAt: Date;
+        youtubeId: string | null;
         thumbnailUrl: string;
+        videoType: import("@prisma/client").$Enums.VideoType;
+        videoUrl: string | null;
+        contributorId: string | null;
+        targetChildId: string | null;
+        approved: boolean;
+        payoutAmount: number;
+        payoutStatus: string;
     }>;
     updateVideo(id: string, data: any): Promise<{
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         durationSeconds: number;
         tags: string[];
-        youtubeId: string;
+        isPublished: boolean;
+        createdAt: Date;
+        youtubeId: string | null;
         thumbnailUrl: string;
+        videoType: import("@prisma/client").$Enums.VideoType;
+        videoUrl: string | null;
+        contributorId: string | null;
+        targetChildId: string | null;
+        approved: boolean;
+        payoutAmount: number;
+        payoutStatus: string;
     }>;
     deleteVideo(id: string): Promise<{
-        isPublished: boolean;
         id: string;
-        createdAt: Date;
-        learningPath: import("@prisma/client").$Enums.LearningPath;
-        nctbClass: number | null;
         title: string;
         titleBn: string;
         description: string;
         descriptionBn: string;
         level: number;
+        learningPath: import("@prisma/client").$Enums.LearningPath;
         isPremium: boolean;
+        nctbClass: number | null;
         durationSeconds: number;
         tags: string[];
-        youtubeId: string;
+        isPublished: boolean;
+        createdAt: Date;
+        youtubeId: string | null;
         thumbnailUrl: string;
+        videoType: import("@prisma/client").$Enums.VideoType;
+        videoUrl: string | null;
+        contributorId: string | null;
+        targetChildId: string | null;
+        approved: boolean;
+        payoutAmount: number;
+        payoutStatus: string;
     }>;
     getSubscriptions(query: {
         status?: string;
@@ -530,15 +558,15 @@ export declare class AdminService {
                 phone: string | null;
             };
         } & {
-            status: import("@prisma/client").$Enums.SubscriptionStatus;
             id: string;
-            userId: string;
-            gateway: import("@prisma/client").$Enums.PaymentGateway;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            status: import("@prisma/client").$Enums.SubscriptionStatus;
+            expiryDate: Date;
+            gateway: import("@prisma/client").$Enums.PaymentGateway;
             planType: string;
             seatCount: number;
-            expiryDate: Date;
             subscriptionId: string | null;
             autoRenew: boolean;
         })[];
@@ -550,15 +578,15 @@ export declare class AdminService {
         };
     }>;
     grantSubscription(userId: string, planType: string, days?: number): Promise<{
-        status: import("@prisma/client").$Enums.SubscriptionStatus;
         id: string;
-        userId: string;
-        gateway: import("@prisma/client").$Enums.PaymentGateway;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
+        status: import("@prisma/client").$Enums.SubscriptionStatus;
+        expiryDate: Date;
+        gateway: import("@prisma/client").$Enums.PaymentGateway;
         planType: string;
         seatCount: number;
-        expiryDate: Date;
         subscriptionId: string | null;
         autoRenew: boolean;
     }>;
@@ -575,15 +603,15 @@ export declare class AdminService {
                 phone: string | null;
             };
         } & {
-            status: string;
             id: string;
+            createdAt: Date;
             userId: string;
+            status: string;
             gateway: import("@prisma/client").$Enums.PaymentGateway;
             transactionId: string;
             amount: number;
             currency: string;
             metadata: import("@prisma/client/runtime/client").JsonValue | null;
-            createdAt: Date;
         })[];
         pagination: {
             page: number;
@@ -603,12 +631,89 @@ export declare class AdminService {
         updatedAt: Date;
         type: string;
         licenseCount: number;
+        contactPhone: string | null;
         adminId: string;
         contactPerson: string | null;
-        contactPhone: string | null;
         customBranding: import("@prisma/client/runtime/client").JsonValue | null;
         nctbClassFocus: number[];
         contractEnd: Date | null;
         monthlyReportDay: number;
     })[]>;
+    getContributions(query: {
+        status?: string;
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        contributions: ({
+            contributor: {
+                id: string;
+                name: string;
+                email: string | null;
+                phone: string | null;
+            };
+        } & {
+            id: string;
+            title: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            contributorId: string;
+            targetChildId: string | null;
+            payoutAmount: number;
+            payoutStatus: string;
+            status: string;
+            contentType: string;
+            fileUrl: string;
+        })[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+    }>;
+    approveContribution(id: string, body: {
+        payoutAmount?: number;
+    }): Promise<{
+        id: string;
+        title: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        contributorId: string;
+        targetChildId: string | null;
+        payoutAmount: number;
+        payoutStatus: string;
+        status: string;
+        contentType: string;
+        fileUrl: string;
+    }>;
+    rejectContribution(id: string): Promise<{
+        id: string;
+        title: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        contributorId: string;
+        targetChildId: string | null;
+        payoutAmount: number;
+        payoutStatus: string;
+        status: string;
+        contentType: string;
+        fileUrl: string;
+    }>;
+    markContributionPayoutPaid(id: string): Promise<{
+        id: string;
+        title: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        contributorId: string;
+        targetChildId: string | null;
+        payoutAmount: number;
+        payoutStatus: string;
+        status: string;
+        contentType: string;
+        fileUrl: string;
+    }>;
 }

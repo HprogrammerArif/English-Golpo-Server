@@ -101,8 +101,8 @@ export declare class ProgressService {
         englishText: string;
         banglaText: string;
         updatedAt: Date;
-        type: string;
         userId: string;
+        type: string;
         incorrectCount: number;
         corrected: boolean;
     }[]>;
@@ -112,8 +112,8 @@ export declare class ProgressService {
         englishText: string;
         banglaText: string;
         updatedAt: Date;
-        type: string;
         userId: string;
+        type: string;
         incorrectCount: number;
         corrected: boolean;
     }>;
@@ -123,8 +123,8 @@ export declare class ProgressService {
         englishText: string;
         banglaText: string;
         updatedAt: Date;
-        type: string;
         userId: string;
+        type: string;
         incorrectCount: number;
         corrected: boolean;
     }>;

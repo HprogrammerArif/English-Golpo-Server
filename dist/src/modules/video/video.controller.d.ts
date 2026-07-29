@@ -2,7 +2,9 @@ import { VideoService, TrackVideoProgressDto } from './video.service';
 export declare class VideoController {
     private readonly videoService;
     constructor(videoService: VideoService);
-    getVideos(path?: string, level?: number, page?: number, limit?: number): Promise<{
+    getVideos(user: {
+        id: string;
+    }, path?: string, level?: number, page?: number, limit?: number, type?: string): Promise<{
         videos: {
             id: string;
             title: string;
@@ -17,8 +19,15 @@ export declare class VideoController {
             tags: string[];
             isPublished: boolean;
             createdAt: Date;
-            youtubeId: string;
+            youtubeId: string | null;
             thumbnailUrl: string;
+            videoType: import("@prisma/client").$Enums.VideoType;
+            videoUrl: string | null;
+            contributorId: string | null;
+            targetChildId: string | null;
+            approved: boolean;
+            payoutAmount: number;
+            payoutStatus: string;
         }[];
         pagination: {
             page: number;
@@ -60,8 +69,15 @@ export declare class VideoController {
         tags: string[];
         isPublished: boolean;
         createdAt: Date;
-        youtubeId: string;
+        youtubeId: string | null;
         thumbnailUrl: string;
+        videoType: import("@prisma/client").$Enums.VideoType;
+        videoUrl: string | null;
+        contributorId: string | null;
+        targetChildId: string | null;
+        approved: boolean;
+        payoutAmount: number;
+        payoutStatus: string;
     }>;
     trackProgress(user: {
         id: string;

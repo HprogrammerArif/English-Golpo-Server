@@ -24,6 +24,7 @@ const growth_module_1 = require("./modules/growth/growth.module");
 const accounts_module_1 = require("./modules/accounts/accounts.module");
 const video_module_1 = require("./modules/video/video.module");
 const admin_module_1 = require("./modules/admin/admin.module");
+const contribution_module_1 = require("./modules/contribution/contribution.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -60,6 +61,7 @@ exports.AppModule = AppModule = __decorate([
             accounts_module_1.AccountsModule,
             video_module_1.VideoModule,
             admin_module_1.AdminModule,
+            contribution_module_1.ContributionModule,
         ],
     })
 ], AppModule);

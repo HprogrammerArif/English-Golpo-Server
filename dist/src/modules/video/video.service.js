@@ -20,6 +20,7 @@ class GetVideosDto {
     level;
     page;
     limit;
+    type;
 }
 exports.GetVideosDto = GetVideosDto;
 __decorate([
@@ -46,6 +47,12 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], GetVideosDto.prototype, "limit", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], GetVideosDto.prototype, "type", void 0);
 class TrackVideoProgressDto {
     videoId;
     watchedSeconds;
@@ -73,14 +80,25 @@ let VideoService = class VideoService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getVideos(dto) {
-        const { path, level, page = 1, limit = 20 } = dto;
+    async getVideos(userId, dto) {
+        const { path, level, page = 1, limit = 20, type } = dto;
         const skip = (page - 1) * limit;
-        const where = { isPublished: true };
+        const where = { approved: true, isPublished: true };
         if (path)
             where.learningPath = path;
         if (level)
             where.level = level;
+        if (type) {
+            where.videoType = type;
+            if (type === 'PARENT') {
+                where.targetChildId = userId;
+                delete where.approved;
+                delete where.isPublished;
+            }
+        }
+        else {
+            where.videoType = { in: ['YOUTUBE', 'PUBLIC'] };
+        }
         const [videos, total] = await this.prisma.$transaction([
             this.prisma.videoLesson.findMany({
                 where,

@@ -84,6 +84,18 @@ let AdminController = class AdminController {
     getB2BOrganizations() {
         return this.adminService.getB2BOrganizations();
     }
+    getContributions(status, page, limit) {
+        return this.adminService.getContributions({ status, page, limit });
+    }
+    approveContribution(id, body) {
+        return this.adminService.approveContribution(id, body);
+    }
+    rejectContribution(id) {
+        return this.adminService.rejectContribution(id);
+    }
+    markPayoutPaid(id) {
+        return this.adminService.markContributionPayoutPaid(id);
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -266,6 +278,41 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getB2BOrganizations", null);
+__decorate([
+    (0, common_1.Get)('contributions'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all user contributed media items' }),
+    __param(0, (0, common_1.Query)('status')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getContributions", null);
+__decorate([
+    (0, common_1.Patch)('contributions/:id/approve'),
+    (0, swagger_1.ApiOperation)({ summary: 'Approve contribution and provision to VideoLesson if VIDEO' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "approveContribution", null);
+__decorate([
+    (0, common_1.Patch)('contributions/:id/reject'),
+    (0, swagger_1.ApiOperation)({ summary: 'Reject contribution' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "rejectContribution", null);
+__decorate([
+    (0, common_1.Patch)('contributions/:id/payout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Mark contribution payout as completed/paid' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "markPayoutPaid", null);
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)('admin'),
     (0, swagger_1.ApiBearerAuth)(),

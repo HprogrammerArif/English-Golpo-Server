@@ -23,8 +23,14 @@ let VideoController = class VideoController {
     constructor(videoService) {
         this.videoService = videoService;
     }
-    getVideos(path, level, page, limit) {
-        return this.videoService.getVideos({ path: path, level: level ? +level : undefined, page, limit });
+    getVideos(user, path, level, page, limit, type) {
+        return this.videoService.getVideos(user.id, {
+            path: path,
+            level: level ? +level : undefined,
+            page,
+            limit,
+            type,
+        });
     }
     getMyProgress(user) {
         return this.videoService.getUserVideoProgress(user.id);
@@ -44,12 +50,15 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'level', required: false, type: Number }),
     (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number }),
     (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number }),
-    __param(0, (0, common_1.Query)('path')),
-    __param(1, (0, common_1.Query)('level', new common_1.DefaultValuePipe(undefined))),
-    __param(2, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
-    __param(3, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    (0, swagger_1.ApiQuery)({ name: 'type', required: false }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('path')),
+    __param(2, (0, common_1.Query)('level', new common_1.DefaultValuePipe(undefined))),
+    __param(3, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(4, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
+    __param(5, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number, Number]),
+    __metadata("design:paramtypes", [Object, String, Number, Number, Number, String]),
     __metadata("design:returntype", void 0)
 ], VideoController.prototype, "getVideos", null);
 __decorate([

@@ -189,4 +189,36 @@ export class AdminController {
   getB2BOrganizations() {
     return this.adminService.getB2BOrganizations();
   }
+
+  // ─── Contributions ────────────────────────────────────────────────────────
+  @Get('contributions')
+  @ApiOperation({ summary: 'Get all user contributed media items' })
+  getContributions(
+    @Query('status') status?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.adminService.getContributions({ status, page, limit });
+  }
+
+  @Patch('contributions/:id/approve')
+  @ApiOperation({ summary: 'Approve contribution and provision to VideoLesson if VIDEO' })
+  approveContribution(
+    @Param('id') id: string,
+    @Body() body: { payoutAmount?: number },
+  ) {
+    return this.adminService.approveContribution(id, body);
+  }
+
+  @Patch('contributions/:id/reject')
+  @ApiOperation({ summary: 'Reject contribution' })
+  rejectContribution(@Param('id') id: string) {
+    return this.adminService.rejectContribution(id);
+  }
+
+  @Patch('contributions/:id/payout')
+  @ApiOperation({ summary: 'Mark contribution payout as completed/paid' })
+  markPayoutPaid(@Param('id') id: string) {
+    return this.adminService.markContributionPayoutPaid(id);
+  }
 }

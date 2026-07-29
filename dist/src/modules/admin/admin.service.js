@@ -805,6 +805,100 @@ Text: ${combinedText.slice(0, 1000)}`;
             orderBy: { createdAt: 'desc' },
         });
     }
+    async getContributions(query) {
+        const page = Number(query.page) || 1;
+        const limit = Number(query.limit) || 20;
+        const skip = (page - 1) * limit;
+        const where = {};
+        if (query.status)
+            where.status = query.status;
+        const [contributions, total] = await this.prisma.$transaction([
+            this.prisma.contribution.findMany({
+                where,
+                include: {
+                    contributor: { select: { id: true, name: true, email: true, phone: true } },
+                },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+            }),
+            this.prisma.contribution.count({ where }),
+        ]);
+        return {
+            contributions,
+            pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        };
+    }
+    async approveContribution(id, body) {
+        const contribution = await this.prisma.contribution.findUnique({
+            where: { id },
+        });
+        if (!contribution)
+            throw new common_1.NotFoundException('Contribution not found');
+        const payoutAmount = Number(body.payoutAmount) || 0;
+        const isPrivateParent = contribution.contentType === 'VIDEO' && contribution.targetChildId != null;
+        const payoutStatus = isPrivateParent ? 'NOT_APPLICABLE' : 'UNPAID';
+        const updated = await this.prisma.contribution.update({
+            where: { id },
+            data: {
+                status: 'APPROVED',
+                payoutAmount,
+                payoutStatus,
+            },
+        });
+        if (contribution.contentType === 'VIDEO') {
+            await this.prisma.videoLesson.create({
+                data: {
+                    title: contribution.title,
+                    titleBn: contribution.title,
+                    description: contribution.description || 'Contributed Video',
+                    descriptionBn: contribution.description || 'অবদানকৃত ভিডিও',
+                    youtubeId: null,
+                    thumbnailUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
+                    videoType: isPrivateParent ? 'PARENT' : 'PUBLIC',
+                    videoUrl: contribution.fileUrl,
+                    learningPath: 'KIDS',
+                    level: 1,
+                    isPremium: false,
+                    isPublished: true,
+                    approved: true,
+                    contributorId: contribution.contributorId,
+                    targetChildId: contribution.targetChildId,
+                    payoutAmount,
+                    payoutStatus,
+                },
+            });
+        }
+        return updated;
+    }
+    async rejectContribution(id) {
+        const contribution = await this.prisma.contribution.findUnique({ where: { id } });
+        if (!contribution)
+            throw new common_1.NotFoundException('Contribution not found');
+        return this.prisma.contribution.update({
+            where: { id },
+            data: {
+                status: 'REJECTED',
+                payoutStatus: 'NOT_APPLICABLE',
+            },
+        });
+    }
+    async markContributionPayoutPaid(id) {
+        const contribution = await this.prisma.contribution.findUnique({ where: { id } });
+        if (!contribution)
+            throw new common_1.NotFoundException('Contribution not found');
+        const updated = await this.prisma.contribution.update({
+            where: { id },
+            data: { payoutStatus: 'PAID' },
+        });
+        if (contribution.contentType === 'VIDEO') {
+            await this.prisma.videoLesson.updateMany({
+                where: { contributorId: contribution.contributorId, videoUrl: contribution.fileUrl },
+                data: { payoutStatus: 'PAID' },
+            });
+        }
+        return updated;
+    }
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([

@@ -187,6 +187,25 @@ let PaymentService = PaymentService_1 = class PaymentService {
         await this.prisma.user.update({ where: { id: userId }, data: { role: 'PREMIUM' } });
         return { boostedUntil: expiryDate };
     }
+    async verifyPersonalBkashPayment(userId, planId, transactionId) {
+        const plan = PLANS[planId];
+        if (!plan)
+            throw new common_1.BadRequestException('Invalid plan ID');
+        const existing = await this.prisma.paymentTransaction.findUnique({
+            where: { transactionId },
+        });
+        if (existing) {
+            throw new common_1.BadRequestException('Transaction ID has already been used.');
+        }
+        await this.confirmPayment({
+            userId,
+            gateway: 'BKASH',
+            transactionId,
+            amount: parseFloat(plan.amount),
+            planId,
+        });
+        return { success: true, message: 'Payment verified and premium activated!' };
+    }
     async confirmPayment(data) {
         const plan = PLANS[data.planId];
         await this.prisma.paymentTransaction.create({

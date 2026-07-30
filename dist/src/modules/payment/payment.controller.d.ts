@@ -10,6 +10,10 @@ declare class UnlockStoryDto {
 declare class BoosterDto {
     transactionId: string;
 }
+declare class VerifyPersonalPaymentDto {
+    planId: string;
+    transactionId: string;
+}
 export declare class PaymentController {
     private readonly paymentService;
     constructor(paymentService: PaymentService);
@@ -19,6 +23,12 @@ export declare class PaymentController {
         checkoutUrl: any;
         paymentId: any;
         merchantInvoice: string;
+    }>;
+    verifyPersonalPayment(user: {
+        id: string;
+    }, dto: VerifyPersonalPaymentDto): Promise<{
+        success: boolean;
+        message: string;
     }>;
     bkashCallback(paymentId: string, status: string, userId: string, planId: string): Promise<{
         redirect: string;
@@ -30,8 +40,8 @@ export declare class PaymentController {
         id: string;
     }, dto: UnlockStoryDto): Promise<{
         id: string;
-        userId: string;
         type: string;
+        userId: string;
         quantity: number;
         referenceId: string | null;
         transactionId: string;

@@ -19,8 +19,8 @@ export declare class PaymentService {
     }>;
     unlockStory(userId: string, storyId: string, transactionId: string): Promise<{
         id: string;
-        userId: string;
         type: string;
+        userId: string;
         quantity: number;
         referenceId: string | null;
         transactionId: string;
@@ -28,6 +28,10 @@ export declare class PaymentService {
     }>;
     activateBooster(userId: string, transactionId: string): Promise<{
         boostedUntil: Date;
+    }>;
+    verifyPersonalBkashPayment(userId: string, planId: string, transactionId: string): Promise<{
+        success: boolean;
+        message: string;
     }>;
     confirmPayment(data: {
         userId: string;

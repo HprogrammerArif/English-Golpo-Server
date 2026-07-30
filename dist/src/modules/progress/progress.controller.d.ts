@@ -85,8 +85,8 @@ export declare class ProgressController {
         englishText: string;
         banglaText: string;
         updatedAt: Date;
-        userId: string;
         type: string;
+        userId: string;
         incorrectCount: number;
         corrected: boolean;
     }[]>;
@@ -98,8 +98,8 @@ export declare class ProgressController {
         englishText: string;
         banglaText: string;
         updatedAt: Date;
-        userId: string;
         type: string;
+        userId: string;
         incorrectCount: number;
         corrected: boolean;
     }>;
@@ -111,8 +111,8 @@ export declare class ProgressController {
         englishText: string;
         banglaText: string;
         updatedAt: Date;
-        userId: string;
         type: string;
+        userId: string;
         incorrectCount: number;
         corrected: boolean;
     }>;

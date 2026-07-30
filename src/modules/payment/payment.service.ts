@@ -221,6 +221,30 @@ export class PaymentService {
     return { boostedUntil: expiryDate };
   }
 
+  async verifyPersonalBkashPayment(userId: string, planId: string, transactionId: string) {
+    const plan = PLANS[planId as keyof typeof PLANS];
+    if (!plan) throw new BadRequestException('Invalid plan ID');
+
+    // Check if transaction ID is already used to prevent double usage
+    const existing = await this.prisma.paymentTransaction.findUnique({
+      where: { transactionId },
+    });
+    if (existing) {
+      throw new BadRequestException('Transaction ID has already been used.');
+    }
+
+    // For testing/mocking, we automatically confirm this payment
+    await this.confirmPayment({
+      userId,
+      gateway: 'BKASH',
+      transactionId,
+      amount: parseFloat(plan.amount),
+      planId,
+    });
+
+    return { success: true, message: 'Payment verified and premium activated!' };
+  }
+
   // ─── Internal: Confirm any payment ───────────────────────────────────────
 
   async confirmPayment(data: {

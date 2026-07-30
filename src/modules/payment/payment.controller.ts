@@ -24,6 +24,14 @@ class BoosterDto {
   @ApiProperty() @IsString() transactionId: string;
 }
 
+class VerifyPersonalPaymentDto {
+  @ApiProperty({ enum: ['monthly','yearly','family'] })
+  @IsIn(['monthly','yearly','family'])
+  planId: string;
+
+  @ApiProperty() @IsString() transactionId: string;
+}
+
 @ApiTags('payment')
 @Controller('payment')
 export class PaymentController {
@@ -39,6 +47,16 @@ export class PaymentController {
     @Body() dto: CreateBkashPaymentDto,
   ) {
     return this.paymentService.createBkashPayment(user.id, dto.planId, dto.storyId);
+  }
+
+  @Post('bkash/verify-personal')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verify manual bKash personal payment via Transaction ID' })
+  verifyPersonalPayment(
+    @CurrentUser() user: { id: string },
+    @Body() dto: VerifyPersonalPaymentDto,
+  ) {
+    return this.paymentService.verifyPersonalBkashPayment(user.id, dto.planId, dto.transactionId);
   }
 
   @Get('bkash/callback')

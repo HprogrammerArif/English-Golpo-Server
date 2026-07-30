@@ -57,6 +57,20 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], BoosterDto.prototype, "transactionId", void 0);
+class VerifyPersonalPaymentDto {
+    planId;
+    transactionId;
+}
+__decorate([
+    (0, swagger_2.ApiProperty)({ enum: ['monthly', 'yearly', 'family'] }),
+    (0, class_validator_1.IsIn)(['monthly', 'yearly', 'family']),
+    __metadata("design:type", String)
+], VerifyPersonalPaymentDto.prototype, "planId", void 0);
+__decorate([
+    (0, swagger_2.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], VerifyPersonalPaymentDto.prototype, "transactionId", void 0);
 let PaymentController = class PaymentController {
     paymentService;
     constructor(paymentService) {
@@ -64,6 +78,9 @@ let PaymentController = class PaymentController {
     }
     createBkashPayment(user, dto) {
         return this.paymentService.createBkashPayment(user.id, dto.planId, dto.storyId);
+    }
+    verifyPersonalPayment(user, dto) {
+        return this.paymentService.verifyPersonalBkashPayment(user.id, dto.planId, dto.transactionId);
     }
     bkashCallback(paymentId, status, userId, planId) {
         return this.paymentService.handleBkashCallback(paymentId, status, userId, planId);
@@ -95,6 +112,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, CreateBkashPaymentDto]),
     __metadata("design:returntype", void 0)
 ], PaymentController.prototype, "createBkashPayment", null);
+__decorate([
+    (0, common_1.Post)('bkash/verify-personal'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Verify manual bKash personal payment via Transaction ID' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, VerifyPersonalPaymentDto]),
+    __metadata("design:returntype", void 0)
+], PaymentController.prototype, "verifyPersonalPayment", null);
 __decorate([
     (0, common_1.Get)('bkash/callback'),
     (0, public_decorator_1.Public)(),

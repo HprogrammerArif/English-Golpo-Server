@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -19,6 +21,8 @@ import { AdminModule } from './modules/admin/admin.module';
 import { ContributionModule } from './modules/contribution/contribution.module';
 
 @Module({
+  controllers: [AppController],
+  providers: [AppService],
   imports: [
     // ─── Config ──────────────────────────────────────────────────────────
     ConfigModule.forRoot({

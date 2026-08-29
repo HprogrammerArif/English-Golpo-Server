@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AdminService } from './admin.service';
 
 @ApiTags('admin')
@@ -46,19 +47,21 @@ export class AdminController {
   @Patch('users/:id/role')
   @ApiOperation({ summary: 'Update user role (FREE, PREMIUM, ADMIN)' })
   updateUserRole(
+    @CurrentUser() admin: { id: string },
     @Param('id') userId: string,
     @Body('role') role: 'FREE' | 'PREMIUM' | 'ADMIN',
   ) {
-    return this.adminService.updateUserRole(userId, role);
+    return this.adminService.updateUserRole(admin.id, userId, role);
   }
 
   @Patch('users/:id/stats')
   @ApiOperation({ summary: 'Adjust user gems, lives, or XP' })
   updateUserStats(
+    @CurrentUser() admin: { id: string },
     @Param('id') userId: string,
     @Body() body: { gems?: number; lives?: number; xpTotal?: number },
   ) {
-    return this.adminService.updateUserStats(userId, body);
+    return this.adminService.updateUserStats(admin.id, userId, body);
   }
 
   // ─── Stories CMS ──────────────────────────────────────────────────────────
@@ -76,20 +79,20 @@ export class AdminController {
 
   @Post('stories')
   @ApiOperation({ summary: 'Create a new story' })
-  createStory(@Body() body: any) {
-    return this.adminService.createStory(body);
+  createStory(@CurrentUser() admin: { id: string }, @Body() body: any) {
+    return this.adminService.createStory(admin.id, body);
   }
 
   @Put('stories/:id')
   @ApiOperation({ summary: 'Update existing story details' })
-  updateStory(@Param('id') id: string, @Body() body: any) {
-    return this.adminService.updateStory(id, body);
+  updateStory(@CurrentUser() admin: { id: string }, @Param('id') id: string, @Body() body: any) {
+    return this.adminService.updateStory(admin.id, id, body);
   }
 
   @Delete('stories/:id')
   @ApiOperation({ summary: 'Delete story by ID' })
-  deleteStory(@Param('id') id: string) {
-    return this.adminService.deleteStory(id);
+  deleteStory(@CurrentUser() admin: { id: string }, @Param('id') id: string) {
+    return this.adminService.deleteStory(admin.id, id);
   }
 
   @Get('stories/:id/detail')
@@ -100,26 +103,28 @@ export class AdminController {
 
   @Post('stories/:id/regenerate')
   @ApiOperation({ summary: 'Regenerate story pages, sentences and vocab tokens from description' })
-  regenerateStoryContent(@Param('id') id: string) {
-    return this.adminService.regenerateStoryContent(id);
+  regenerateStoryContent(@CurrentUser() admin: { id: string }, @Param('id') id: string) {
+    return this.adminService.regenerateStoryContent(admin.id, id);
   }
 
   @Post('stories/:id/pages')
   @ApiOperation({ summary: 'Add a new page to story' })
   addPageToStory(
+    @CurrentUser() admin: { id: string },
     @Param('id') storyId: string,
     @Body() body: { pageIndex: number; imageUrl: string },
   ) {
-    return this.adminService.addPageToStory(storyId, body.pageIndex, body.imageUrl);
+    return this.adminService.addPageToStory(admin.id, storyId, body.pageIndex, body.imageUrl);
   }
 
   @Post('pages/:pageId/sentences')
   @ApiOperation({ summary: 'Add sentence to story page' })
   addSentenceToPage(
+    @CurrentUser() admin: { id: string },
     @Param('pageId') pageId: string,
     @Body() body: { sentenceIdx: number; englishText: string; banglaText: string; startTime: number; endTime: number },
   ) {
-    return this.adminService.addSentenceToPage(pageId, body);
+    return this.adminService.addSentenceToPage(admin.id, pageId, body);
   }
 
   // ─── Video CMS ────────────────────────────────────────────────────────────
@@ -136,20 +141,20 @@ export class AdminController {
 
   @Post('videos')
   @ApiOperation({ summary: 'Create a new video lesson' })
-  createVideo(@Body() body: any) {
-    return this.adminService.createVideo(body);
+  createVideo(@CurrentUser() admin: { id: string }, @Body() body: any) {
+    return this.adminService.createVideo(admin.id, body);
   }
 
   @Put('videos/:id')
   @ApiOperation({ summary: 'Update video lesson' })
-  updateVideo(@Param('id') id: string, @Body() body: any) {
-    return this.adminService.updateVideo(id, body);
+  updateVideo(@CurrentUser() admin: { id: string }, @Param('id') id: string, @Body() body: any) {
+    return this.adminService.updateVideo(admin.id, id, body);
   }
 
   @Delete('videos/:id')
   @ApiOperation({ summary: 'Delete video lesson' })
-  deleteVideo(@Param('id') id: string) {
-    return this.adminService.deleteVideo(id);
+  deleteVideo(@CurrentUser() admin: { id: string }, @Param('id') id: string) {
+    return this.adminService.deleteVideo(admin.id, id);
   }
 
   // ─── Subscriptions & Financials ─────────────────────────────────────────
@@ -166,11 +171,12 @@ export class AdminController {
   @Post('subscriptions/grant')
   @ApiOperation({ summary: 'Manually grant Premium subscription to a user' })
   grantSubscription(
+    @CurrentUser() admin: { id: string },
     @Body('userId') userId: string,
     @Body('planType') planType: string,
     @Body('days') days?: number,
   ) {
-    return this.adminService.grantSubscription(userId, planType, days);
+    return this.adminService.grantSubscription(admin.id, userId, planType, days);
   }
 
   @Get('transactions')
@@ -204,21 +210,22 @@ export class AdminController {
   @Patch('contributions/:id/approve')
   @ApiOperation({ summary: 'Approve contribution and provision to VideoLesson if VIDEO' })
   approveContribution(
+    @CurrentUser() admin: { id: string },
     @Param('id') id: string,
     @Body() body: { payoutAmount?: number },
   ) {
-    return this.adminService.approveContribution(id, body);
+    return this.adminService.approveContribution(admin.id, id, body);
   }
 
   @Patch('contributions/:id/reject')
   @ApiOperation({ summary: 'Reject contribution' })
-  rejectContribution(@Param('id') id: string) {
-    return this.adminService.rejectContribution(id);
+  rejectContribution(@CurrentUser() admin: { id: string }, @Param('id') id: string) {
+    return this.adminService.rejectContribution(admin.id, id);
   }
 
   @Patch('contributions/:id/payout')
   @ApiOperation({ summary: 'Mark contribution payout as completed/paid' })
-  markPayoutPaid(@Param('id') id: string) {
-    return this.adminService.markContributionPayoutPaid(id);
+  markPayoutPaid(@CurrentUser() admin: { id: string }, @Param('id') id: string) {
+    return this.adminService.markContributionPayoutPaid(admin.id, id);
   }
 }

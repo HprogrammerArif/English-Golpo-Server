@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { GamificationService } from '../gamification/gamification.service';
 import { LearningPath } from '@prisma/client';
 import { IsString, IsNumber, IsBoolean, IsOptional, IsArray, IsIn, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -20,7 +21,10 @@ export class TrackVideoProgressDto {
 
 @Injectable()
 export class VideoService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gamification: GamificationService,
+  ) {}
 
   async getVideos(userId: string, dto: GetVideosDto) {
     const { path, level, page = 1, limit = 20, type } = dto;
@@ -59,9 +63,24 @@ export class VideoService {
     };
   }
 
-  async getVideoById(id: string) {
+  async getVideoById(id: string, userId: string, userRole: string) {
     const video = await this.prisma.videoLesson.findUnique({ where: { id } });
     if (!video) throw new NotFoundException('Video not found');
+
+    const isPremiumUser = userRole === 'PREMIUM' || userRole === 'ADMIN';
+    if (video.isPremium && !isPremiumUser) {
+      const unlocked = await this.prisma.consumablePurchase.findFirst({
+        where: { userId, type: 'VIDEO_UNLOCK', referenceId: id },
+      });
+      if (!unlocked) {
+        throw new ForbiddenException({
+          message: 'This video requires a Premium subscription',
+          code: 'PAYWALL',
+          videoId: id,
+        });
+      }
+    }
+
     return video;
   }
 
@@ -97,10 +116,7 @@ export class VideoService {
 
     // Award XP on first completion
     if (dto.completed && xpReward > 0) {
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { xpTotal: { increment: xpReward } },
-      });
+      await this.gamification.addXp(userId, xpReward);
     }
 
     return progress;

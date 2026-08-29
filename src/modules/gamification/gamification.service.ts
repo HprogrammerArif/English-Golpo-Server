@@ -11,13 +11,21 @@ const LEAGUE_THRESHOLDS = {
   DIAMOND: 10000,
 };
 
+// Fixed, server-defined gem rewards per mini-game outcome — never a client-supplied amount.
+export const GAME_REWARD_SOURCES = ['SUDOKU_EASY', 'SUDOKU_MEDIUM', 'SUDOKU_HARD'] as const;
+const GEM_REWARDS: Record<(typeof GAME_REWARD_SOURCES)[number], number> = {
+  SUDOKU_EASY: 5,
+  SUDOKU_MEDIUM: 10,
+  SUDOKU_HARD: 15,
+};
+
 @Injectable()
 export class GamificationService {
   private readonly logger = new Logger(GamificationService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  // ─── Add XP ───────────────────────────────────────────────────────────────
+  // ─── Add XP (internal use only — called by quiz/video completion, never a public route) ────
 
   async addXp(userId: string, amount: number) {
     const user = await this.prisma.user.update({
@@ -77,6 +85,37 @@ export class GamificationService {
         target: dailyGoal.targetXp,
         completed: dailyGoal.earnedXp >= dailyGoal.targetXp,
       },
+    };
+  }
+
+  // ─── Add Gems ─────────────────────────────────────────────────────────────
+
+  async addGems(userId: string, source: string) {
+    const amount = GEM_REWARDS[source as (typeof GAME_REWARD_SOURCES)[number]];
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { gems: { increment: amount } },
+      select: { gems: true },
+    });
+
+    return { gemsAdded: amount, gemsTotal: user.gems };
+  }
+
+  // ─── Daily Goal ───────────────────────────────────────────────────────────
+
+  async getDailyGoal(userId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dailyGoal = await this.prisma.dailyGoal.findUnique({
+      where: { userId_date: { userId, date: today } },
+    });
+
+    return {
+      earned: dailyGoal?.earnedXp ?? 0,
+      target: dailyGoal?.targetXp ?? 50,
+      completed: dailyGoal?.completed ?? false,
     };
   }
 

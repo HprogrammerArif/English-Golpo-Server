@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { GamificationService } from '../gamification/gamification.service';
 import { IsString, IsArray, IsNumber, IsInt, Min, Max } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -10,12 +11,30 @@ export class SubmitQuizDto {
 }
 
 const XP_PER_CORRECT = 10;
+const MAX_LIVES = 5;
+
+function hasUnlimitedLives(role: string) {
+  return role === 'PREMIUM' || role === 'ADMIN';
+}
 
 @Injectable()
 export class QuizService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gamification: GamificationService,
+  ) {}
 
-  async getQuiz(storyId: string) {
+  async getQuiz(storyId: string, userId: string, userRole: string) {
+    if (!hasUnlimitedLives(userRole)) {
+      const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { lives: true } });
+      if (!user || user.lives <= 0) {
+        throw new ForbiddenException({
+          message: 'You have no lives left. Refill in the shop to keep going.',
+          code: 'NO_LIVES',
+        });
+      }
+    }
+
     const quiz = await this.prisma.quiz.findFirst({
       where: { storyId },
       include: {
@@ -37,6 +56,17 @@ export class QuizService {
   }
 
   async submitQuiz(userId: string, storyId: string, dto: SubmitQuizDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { lives: true, role: true } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const unlimitedLives = hasUnlimitedLives(user.role);
+    if (!unlimitedLives && user.lives <= 0) {
+      throw new ForbiddenException({
+        message: 'You have no lives left. Refill in the shop to keep going.',
+        code: 'NO_LIVES',
+      });
+    }
+
     const quiz = await this.prisma.quiz.findFirst({
       where: { storyId },
       include: { questions: { orderBy: { id: 'asc' } } },
@@ -88,6 +118,7 @@ export class QuizService {
     });
 
     const score = Math.round((correctCount / quiz.questions.length) * 100);
+    const wrongCount = quiz.questions.length - correctCount;
 
     // Save progress
     await this.prisma.userProgress.upsert({
@@ -96,6 +127,20 @@ export class QuizService {
       update: { score: Math.max(score, 0), completed: true },
     });
 
-    return { score, xpEarned, correctCount, totalQuestions: quiz.questions.length, results };
+    let livesRemaining = user.lives;
+    if (!unlimitedLives && wrongCount > 0) {
+      const result = await this.prisma.user.update({
+        where: { id: userId },
+        data: { lives: { decrement: Math.min(wrongCount, user.lives) } },
+        select: { lives: true },
+      });
+      livesRemaining = Math.max(0, Math.min(result.lives, MAX_LIVES));
+    }
+
+    if (xpEarned > 0) {
+      await this.gamification.addXp(userId, xpEarned);
+    }
+
+    return { score, xpEarned, correctCount, totalQuestions: quiz.questions.length, results, livesRemaining };
   }
 }

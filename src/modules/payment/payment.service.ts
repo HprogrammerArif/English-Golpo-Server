@@ -4,6 +4,7 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import axios from 'axios';
@@ -291,5 +292,38 @@ export class PaymentService {
     }
 
     this.logger.log(`Payment confirmed: ${data.transactionId} for user ${data.userId}`);
+  }
+
+  // ─── Scheduled: Expire lapsed subscriptions ────────────────────────────────
+  // RevenueCat pushes its own expiry via webhook, but manual/bKash/admin-granted
+  // subscriptions have no external gateway to notify us — sweep for them daily.
+
+  @Cron('0 3 * * *') // Run at 3AM daily
+  async handleSubscriptionExpiry() {
+    const expired = await this.prisma.subscription.findMany({
+      where: { status: 'ACTIVE', expiryDate: { lt: new Date() } },
+      select: { id: true, userId: true },
+    });
+
+    if (expired.length === 0) return;
+
+    for (const sub of expired) {
+      await this.prisma.subscription.update({
+        where: { id: sub.id },
+        data: { status: 'EXPIRED' },
+      });
+
+      const stillActive = await this.prisma.subscription.findFirst({
+        where: { userId: sub.userId, status: 'ACTIVE' },
+      });
+      if (!stillActive) {
+        await this.prisma.user.update({
+          where: { id: sub.userId },
+          data: { role: 'FREE' },
+        });
+      }
+    }
+
+    this.logger.log(`[CRON] Expired ${expired.length} subscription(s)`);
   }
 }

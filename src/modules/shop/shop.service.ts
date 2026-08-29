@@ -10,6 +10,8 @@ const ITEM_PRICES: Record<string, number> = {
   BONUS_LESSON: 100,
 };
 
+const MAX_LIVES = 5;
+
 export class BuyItemDto {
   @ApiProperty({ enum: Object.keys(ITEM_PRICES) })
   @IsIn(Object.keys(ITEM_PRICES))
@@ -36,22 +38,20 @@ export class ShopService {
     const price = ITEM_PRICES[dto.itemType];
     if (!price) throw new BadRequestException('Unknown item type');
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { gems: true },
-    });
-
-    if (!user || user.gems < price) {
-      throw new BadRequestException(`Insufficient gems. Need ${price}, have ${user?.gems || 0}`);
-    }
-
-    // Deduct gems and add item
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: userId },
+    return this.prisma.$transaction(async (tx) => {
+      // Atomic guarded decrement — only succeeds if the balance is still sufficient,
+      // closing the race window between a balance check and the deduction.
+      const deducted = await tx.user.updateMany({
+        where: { id: userId, gems: { gte: price } },
         data: { gems: { decrement: price } },
-      }),
-      this.prisma.userItem.upsert({
+      });
+
+      if (deducted.count === 0) {
+        const user = await tx.user.findUnique({ where: { id: userId }, select: { gems: true } });
+        throw new BadRequestException(`Insufficient gems. Need ${price}, have ${user?.gems || 0}`);
+      }
+
+      await tx.userItem.upsert({
         where: {
           // Use a pseudo-unique condition
           id: `${userId}-${dto.itemType}-${dto.itemId || 'default'}`,
@@ -64,10 +64,18 @@ export class ShopService {
           quantity: 1,
         },
         update: { quantity: { increment: 1 } },
-      }),
-    ]);
+      });
 
-    return { purchased: dto.itemType, gemsSpent: price };
+      // An Extra Life is an instant-use consumable — apply its effect immediately, capped at MAX_LIVES.
+      if (dto.itemType === 'EXTRA_LIFE') {
+        const current = await tx.user.findUnique({ where: { id: userId }, select: { lives: true } });
+        if (current && current.lives < MAX_LIVES) {
+          await tx.user.update({ where: { id: userId }, data: { lives: { increment: 1 } } });
+        }
+      }
+
+      return { purchased: dto.itemType, gemsSpent: price };
+    });
   }
 
   async refillLives(userId: string, adToken: string) {

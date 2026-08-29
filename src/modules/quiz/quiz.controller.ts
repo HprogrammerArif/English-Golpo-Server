@@ -11,8 +11,11 @@ export class QuizController {
 
   @Get(':storyId')
   @ApiOperation({ summary: 'Get quiz questions for a story (answers not included)' })
-  getQuiz(@Param('storyId') storyId: string) {
-    return this.quizService.getQuiz(storyId);
+  getQuiz(
+    @Param('storyId') storyId: string,
+    @CurrentUser() user: { id: string; role: string },
+  ) {
+    return this.quizService.getQuiz(storyId, user.id, user.role);
   }
 
   @Post(':storyId/submit')

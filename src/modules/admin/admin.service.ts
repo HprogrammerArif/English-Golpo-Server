@@ -10,6 +10,19 @@ export class AdminService {
     private readonly config: ConfigService,
   ) {}
 
+  // ─── Audit Trail ─────────────────────────────────────────────────────────
+  private async logAction(
+    adminId: string,
+    action: string,
+    targetType: string,
+    targetId?: string,
+    metadata?: Record<string, unknown>,
+  ) {
+    await this.prisma.adminAuditLog.create({
+      data: { adminId, action, targetType, targetId, metadata: metadata as any },
+    });
+  }
+
   // ─── Dashboard Stats ───────────────────────────────────────────────────────
   async getDashboardStats() {
     const [
@@ -105,21 +118,23 @@ export class AdminService {
     };
   }
 
-  async updateUserRole(userId: string, role: 'FREE' | 'PREMIUM' | 'ADMIN') {
+  async updateUserRole(adminId: string, userId: string, role: 'FREE' | 'PREMIUM' | 'ADMIN') {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    return this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: userId },
       data: { role },
     });
+    await this.logAction(adminId, 'USER_ROLE_UPDATE', 'User', userId, { from: user.role, to: role });
+    return updated;
   }
 
-  async updateUserStats(userId: string, data: { gems?: number; lives?: number; xpTotal?: number }) {
+  async updateUserStats(adminId: string, userId: string, data: { gems?: number; lives?: number; xpTotal?: number }) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    return this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id: userId },
       data: {
         ...(data.gems !== undefined && { gems: Number(data.gems) }),
@@ -127,6 +142,8 @@ export class AdminService {
         ...(data.xpTotal !== undefined && { xpTotal: Number(data.xpTotal) }),
       },
     });
+    await this.logAction(adminId, 'USER_STATS_UPDATE', 'User', userId, data);
+    return updated;
   }
 
   // ─── Story CMS ─────────────────────────────────────────────────────────────
@@ -175,7 +192,7 @@ export class AdminService {
     };
   }
 
-  async createStory(data: any) {
+  async createStory(adminId: string, data: any) {
     const story = await this.prisma.story.create({
       data: {
         title: data.title,
@@ -197,6 +214,7 @@ export class AdminService {
     });
 
     await this.autoGenerateContent(story.id);
+    await this.logAction(adminId, 'STORY_CREATE', 'Story', story.id, { title: data.title });
     return this.prisma.story.findUnique({
       where: { id: story.id },
       include: {
@@ -249,7 +267,7 @@ export class AdminService {
   }
 
   // Force regenerate: delete existing pages/sentences/tokens then recreate
-  async regenerateStoryContent(storyId: string) {
+  async regenerateStoryContent(adminId: string, storyId: string) {
     const story = await this.prisma.story.findUnique({
       where: { id: storyId },
       include: { pages: true, quizzes: true }
@@ -262,6 +280,7 @@ export class AdminService {
     await this.prisma.quiz.deleteMany({ where: { storyId } });
 
     await this._generatePagesAndTokens(story as any);
+    await this.logAction(adminId, 'STORY_REGENERATE', 'Story', storyId);
 
     return this.prisma.story.findUnique({
       where: { id: storyId },
@@ -672,7 +691,7 @@ Text: ${combinedText.slice(0, 1000)}`;
     }
   }
 
-  async updateStory(id: string, data: any) {
+  async updateStory(adminId: string, id: string, data: any) {
     const story = await this.prisma.story.findUnique({ where: { id } });
     if (!story) throw new NotFoundException('Story not found');
 
@@ -690,28 +709,33 @@ Text: ${combinedText.slice(0, 1000)}`;
     });
 
     await this.autoGenerateContent(id);
+    await this.logAction(adminId, 'STORY_UPDATE', 'Story', id, updateData);
     return updated;
   }
 
-  async deleteStory(id: string) {
+  async deleteStory(adminId: string, id: string) {
     const story = await this.prisma.story.findUnique({ where: { id } });
     if (!story) throw new NotFoundException('Story not found');
 
-    return this.prisma.story.delete({ where: { id } });
+    const deleted = await this.prisma.story.delete({ where: { id } });
+    await this.logAction(adminId, 'STORY_DELETE', 'Story', id, { title: story.title });
+    return deleted;
   }
 
-  async addPageToStory(storyId: string, pageIndex: number, imageUrl: string) {
-    return this.prisma.storyPage.create({
+  async addPageToStory(adminId: string, storyId: string, pageIndex: number, imageUrl: string) {
+    const page = await this.prisma.storyPage.create({
       data: {
         storyId,
         pageIndex: Number(pageIndex),
         imageUrl: imageUrl || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600',
       },
     });
+    await this.logAction(adminId, 'STORY_PAGE_ADD', 'StoryPage', page.id, { storyId });
+    return page;
   }
 
-  async addSentenceToPage(pageId: string, data: { sentenceIdx: number; englishText: string; banglaText: string; startTime: number; endTime: number }) {
-    return this.prisma.sentence.create({
+  async addSentenceToPage(adminId: string, pageId: string, data: { sentenceIdx: number; englishText: string; banglaText: string; startTime: number; endTime: number }) {
+    const sentence = await this.prisma.sentence.create({
       data: {
         pageId,
         sentenceIdx: Number(data.sentenceIdx),
@@ -721,6 +745,8 @@ Text: ${combinedText.slice(0, 1000)}`;
         endTime: Number(data.endTime) || 0,
       },
     });
+    await this.logAction(adminId, 'STORY_SENTENCE_ADD', 'Sentence', sentence.id, { pageId });
+    return sentence;
   }
 
   // ─── Video Lesson CMS ─────────────────────────────────────────────────────
@@ -756,8 +782,8 @@ Text: ${combinedText.slice(0, 1000)}`;
     };
   }
 
-  async createVideo(data: any) {
-    return this.prisma.videoLesson.create({
+  async createVideo(adminId: string, data: any) {
+    const video = await this.prisma.videoLesson.create({
       data: {
         title: data.title,
         titleBn: data.titleBn,
@@ -774,9 +800,11 @@ Text: ${combinedText.slice(0, 1000)}`;
         isPublished: Boolean(data.isPublished),
       },
     });
+    await this.logAction(adminId, 'VIDEO_CREATE', 'VideoLesson', video.id, { title: data.title });
+    return video;
   }
 
-  async updateVideo(id: string, data: any) {
+  async updateVideo(adminId: string, id: string, data: any) {
     const updateData: any = { ...data };
     if (data.level !== undefined) updateData.level = Number(data.level);
     if (data.nctbClass !== undefined) updateData.nctbClass = data.nctbClass ? Number(data.nctbClass) : null;
@@ -784,14 +812,18 @@ Text: ${combinedText.slice(0, 1000)}`;
     if (data.isPremium !== undefined) updateData.isPremium = Boolean(data.isPremium);
     if (data.isPublished !== undefined) updateData.isPublished = Boolean(data.isPublished);
 
-    return this.prisma.videoLesson.update({
+    const updated = await this.prisma.videoLesson.update({
       where: { id },
       data: updateData,
     });
+    await this.logAction(adminId, 'VIDEO_UPDATE', 'VideoLesson', id, updateData);
+    return updated;
   }
 
-  async deleteVideo(id: string) {
-    return this.prisma.videoLesson.delete({ where: { id } });
+  async deleteVideo(adminId: string, id: string) {
+    const deleted = await this.prisma.videoLesson.delete({ where: { id } });
+    await this.logAction(adminId, 'VIDEO_DELETE', 'VideoLesson', id, { title: deleted.title });
+    return deleted;
   }
 
   // ─── Subscription & Payment Management ─────────────────────────────────────
@@ -819,7 +851,7 @@ Text: ${combinedText.slice(0, 1000)}`;
     return { subscriptions, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
   }
 
-  async grantSubscription(userId: string, planType: string, days = 30) {
+  async grantSubscription(adminId: string, userId: string, planType: string, days = 30) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -831,7 +863,7 @@ Text: ${combinedText.slice(0, 1000)}`;
       data: { role: 'PREMIUM' },
     });
 
-    return this.prisma.subscription.create({
+    const subscription = await this.prisma.subscription.create({
       data: {
         userId,
         gateway: 'BKASH',
@@ -841,6 +873,8 @@ Text: ${combinedText.slice(0, 1000)}`;
         autoRenew: false,
       },
     });
+    await this.logAction(adminId, 'SUBSCRIPTION_GRANT', 'Subscription', subscription.id, { userId, planType, days });
+    return subscription;
   }
 
   async getTransactions(query: { status?: string; page?: number; limit?: number }) {
@@ -905,7 +939,7 @@ Text: ${combinedText.slice(0, 1000)}`;
     };
   }
 
-  async approveContribution(id: string, body: { payoutAmount?: number }) {
+  async approveContribution(adminId: string, id: string, body: { payoutAmount?: number }) {
     const contribution = await this.prisma.contribution.findUnique({
       where: { id },
     });
@@ -950,23 +984,26 @@ Text: ${combinedText.slice(0, 1000)}`;
       });
     }
 
+    await this.logAction(adminId, 'CONTRIBUTION_APPROVE', 'Contribution', id, { payoutAmount });
     return updated;
   }
 
-  async rejectContribution(id: string) {
+  async rejectContribution(adminId: string, id: string) {
     const contribution = await this.prisma.contribution.findUnique({ where: { id } });
     if (!contribution) throw new NotFoundException('Contribution not found');
 
-    return this.prisma.contribution.update({
+    const updated = await this.prisma.contribution.update({
       where: { id },
       data: {
         status: 'REJECTED',
         payoutStatus: 'NOT_APPLICABLE',
       },
     });
+    await this.logAction(adminId, 'CONTRIBUTION_REJECT', 'Contribution', id);
+    return updated;
   }
 
-  async markContributionPayoutPaid(id: string) {
+  async markContributionPayoutPaid(adminId: string, id: string) {
     const contribution = await this.prisma.contribution.findUnique({ where: { id } });
     if (!contribution) throw new NotFoundException('Contribution not found');
 
@@ -984,6 +1021,7 @@ Text: ${combinedText.slice(0, 1000)}`;
       });
     }
 
+    await this.logAction(adminId, 'CONTRIBUTION_PAYOUT_PAID', 'Contribution', id);
     return updated;
   }
 }

@@ -46,8 +46,11 @@ export class VideoController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get single video lesson by ID' })
-  getVideo(@Param('id') id: string) {
-    return this.videoService.getVideoById(id);
+  getVideo(
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string; role: string },
+  ) {
+    return this.videoService.getVideoById(id, user.id, user.role);
   }
 
   @Post('progress')
